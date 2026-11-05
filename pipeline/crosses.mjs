@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 // Sensor crosses, for the fitness function Order crosses the systems: the repository it runs in as it
-// is, the other as its main has it, both running and talking over HTTP. Only the carrier, another
+// is, the other as the same change has it (its branch change/<n>), else as its main has it, both running
+// and talking over HTTP. Only the carrier, another
 // company's, stands in. An order goes through every call the Shop makes to the Warehouse, and what the
 // Warehouse answers has to come out of the Shop, so a field named differently on each side fails here.
 // A repository's sensors.json runs it from that repository's root; both have the file in .agent/system.
-import { execFileSync, spawn } from 'node:child_process'
+import { execFileSync, spawn, spawnSync } from 'node:child_process'
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
@@ -24,11 +25,17 @@ const copies = mkdtempSync(join(tmpdir(), 'crosses-'))
 const running = []
 const server = (address) => new Promise((resolve) => address.listen(0, '127.0.0.1', () => resolve(`http://127.0.0.1:${address.address().port}`)))
 
-/** Where each system's code is: this checkout, or a fresh copy of the other's main. */
+/** The change this checkout is on: the pull request's branch in a gate, else the branch checked out. */
+const branch = process.env.GITHUB_HEAD_REF || spawnSync('git', ['branch', '--show-current'], { encoding: 'utf8' }).stdout.trim()
+const change = /^change\/\d+$/.test(branch) ? branch : null
+
+/** Where each system's code is: this checkout, or a fresh copy of the other's, on this change or main. */
 const rootOf = Object.fromEntries(repositories.map(({ name, repo }) => {
   if (here.endsWith(`.${name}`)) return [name, process.cwd()]
   const dir = join(copies, name)
-  execFileSync('git', ['clone', '-q', '--depth', '1', repo, dir], { stdio: 'inherit' })
+  const onChange = change && spawnSync('git', ['ls-remote', '--exit-code', '--heads', repo, change]).status === 0
+  execFileSync('git', ['clone', '-q', '--depth', '1', ...(onChange ? ['--branch', change] : []), repo, dir], { stdio: 'inherit' })
+  console.log(`The ${name} as ${onChange ? change : 'main'} has it.`)
   execFileSync('npm', ['ci', '--omit=dev', '--no-audit', '--no-fund', '--silent'], { cwd: dir, stdio: 'inherit' })
   return [name, dir]
 }))

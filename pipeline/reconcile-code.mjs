@@ -1,62 +1,93 @@
 #!/usr/bin/env node
-// A repository's side of the loop, on its checkout, after `node tools/model.mjs --whole` and the
-// standards. The rest of what the standards' reconcile.mjs says holds here too: one try per version
-// of the model, one pull request or one ticket. No AI runs here.
+// A repository's side of the loop, on its checkout of the change's branch change/<n>, after
+// `node tools/model.mjs --whole --ref change/<n>` and the standards. No AI runs here: the coding agent
+// runs before `outcome`, and pipeline/said.mjs asks it what became of its run.
 //
-//   node .agent/system/pipeline/reconcile-code.mjs next        what to do now, on GITHUB_OUTPUT
-//   node .agent/system/pipeline/reconcile-code.mjs outcome <report> <step>   what became of the agent's run
-//   node .agent/system/pipeline/reconcile-code.mjs neighbours  the other repositories, in .agent/providers/<name>/
-import { execFileSync } from 'node:child_process'
-import { appendFileSync, existsSync, readFileSync, rmSync } from 'node:fs'
+//   node .agent/system/pipeline/reconcile-code.mjs next            what to do now, on GITHUB_OUTPUT
+//   node .agent/system/pipeline/reconcile-code.mjs outcome <said.json> <step>   what becomes of the agent's run
+//   node .agent/system/pipeline/reconcile-code.mjs proof <base> <out.md>   the tests of the scenarios changed since base
+//   node .agent/system/pipeline/reconcile-code.mjs neighbours <branch>    the other repositories, in .agent/providers/<name>/
+import { execFileSync, spawnSync } from 'node:child_process'
+import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { gapSince, mappedBy } from './part.mjs'
+import { gapSince, mappedBy, partOf, readNodes, readRelations } from './part.mjs'
+import { fits } from './said.mjs'
 
 const MODEL = '.radical/model'
-const PREFIX = 'agent/reconcile-'
 const run = (command, ...args) => execFileSync(command, args, { encoding: 'utf8', maxBuffer: 64 << 20 }).trim()
 
-/** What became of the agent's run. Code it built with a question goes up as a draft, with the question
- *  in its text: the work stays, the gate reads it, and a person decides. A run that says it needs no code
- *  goes up however it wrote that, not only under the heading the standards read: the gate still judges
- *  the pull request. Anything else is as the standards say. */
-export function outcome({ report = '', changed, failed, questions, otherwise }) {
-  if (!failed && changed) return { act: 'pull', draft: questions }
-  if (!failed && !questions && /^\W*No code needed\b/im.test(report)) return { act: 'pull', draft: false }
-  return { act: otherwise, draft: false }
+/** What becomes of the coding agent's run, from what it said and what it did:
+ *  push its code, mark the commit of the model reached, ask the model agent. None of them: a person reads
+ *  why. It reaches the commit only with nothing asked, so a question never makes a change look done. */
+export function outcome({ said, changed, failed }) {
+  const none = { push: false, mark: false, ask: false }
+  if (failed || !fits(said, 'coding-agent') || said.result === 'could-not') return none
+  if (said.result === 'built' && !changed) return none
+  const asks = said.result === 'question' || said.questions.length > 0
+  return { push: changed || !asks, mark: !asks, ask: asks }
+}
+
+/** The scenarios of the part that changed since `base`, with the tests bound to them. */
+export function scenariosToProve(report, here, nodes, verifies) {
+  const type = new Map(nodes.map((n) => [n.id, n.type]))
+  const changed = [...report.elements.added, ...report.elements.changed].filter((e) => (e.type ?? type.get(e.id)) === 'scenario' && here.has(e.id))
+  return changed.map((e) => ({ id: e.id, label: e.label, tests: verifies.find((v) => v.element === e.id)?.tests ?? [] }))
+}
+
+/** The proof as a pull request shows it. */
+export function proofText(rows) {
+  if (!rows.length) return 'No scenario of this part changed.'
+  const mark = { proven: 'fails on main, passes here', 'not proven': 'not proven', none: 'no test bound' }
+  return ['| Scenario | Test | |', '|---|---|---|', ...rows.map((r) => `| ${r.label} | ${r.test ? `\`${r.test}\`` : ''} | ${mark[r.state]}${r.why ? `: ${r.why}` : ''} |`)].join('\n')
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const repo = process.env.GITHUB_REPOSITORY
   const command = process.argv[2]
 
   if (command === 'next') {
-    const { nextStep, branchOf } = await import(join(process.cwd(), '.standards/pipeline/tools/reconcile.mjs'))
-    const { model: reconciled } = JSON.parse(readFileSync('.radical/reconciled.json', 'utf8'))
+    const { model: base } = JSON.parse(readFileSync('.radical/reconciled.json', 'utf8'))
     const desired = readFileSync('.agent/desired', 'utf8').trim()
-    const pulls = JSON.parse(run('gh', 'pr', 'list', '--repo', repo, '--state', 'all', '--limit', '200', '--json', 'number,state,headRefName')).filter((p) => p.headRefName.startsWith(PREFIX))
-    const tickets = JSON.parse(run('gh', 'issue', 'list', '--repo', repo, '--state', 'all', '--label', 'agent:stuck', '--limit', '200', '--json', 'number,body,state')).filter((t) => t.body?.includes('<!-- reconcile '))
-    const closes = tickets.filter((t) => t.state === 'OPEN').map((t) => t.number).join(' ')
-    const { step, reason } = nextStep({ gap: gapSince(MODEL, reconciled, mappedBy('.radical/radical.json')), desired, pulls, tickets })
-    console.log(`${step}: ${reason}.`)
-    appendFileSync(process.env.GITHUB_OUTPUT ?? '/dev/null', [`step=${step}`, `base=${reconciled}`, `desired=${desired}`, `branch=${branchOf(desired)}`, `closes=${closes}`].map((l) => `${l}\n`).join(''))
+    const gap = gapSince(MODEL, base, mappedBy('.radical/radical.json'))
+    console.log(gap ? `work: ${gap} change(s) of the model at ${desired.slice(0, 7)} are not in the code.` : 'converged: the code has reached the model.')
+    appendFileSync(process.env.GITHUB_OUTPUT ?? '/dev/null', [`step=${gap ? 'work' : 'converged'}`, `base=${base}`, `desired=${desired}`].map((l) => `${l}\n`).join(''))
   } else if (command === 'outcome') {
-    const { outcomeOf } = await import(join(process.cwd(), '.standards/pipeline/tools/reconcile.mjs'))
-    const { hasModelQuestions } = await import(join(process.cwd(), '.standards/pipeline/tools/questions.mjs'))
-    const report = existsSync(process.argv[3]) ? readFileSync(process.argv[3], 'utf8') : ''
-    const facts = { report, changed: run('git', 'status', '--porcelain') !== '', failed: process.argv[4] !== 'success' }
-    const { act, draft } = outcome({ ...facts, questions: hasModelQuestions(report), otherwise: outcomeOf(facts) })
-    console.log(`The agent's run ends in: ${act}${draft ? ', as a draft' : ''}.`)
-    appendFileSync(process.env.GITHUB_OUTPUT ?? '/dev/null', `act=${act}\ndraft=${draft}\n`)
+    const said = existsSync(process.argv[3]) ? JSON.parse(readFileSync(process.argv[3], 'utf8')) : null
+    const facts = { said, changed: run('git', 'status', '--porcelain') !== '', failed: process.argv[4] !== 'success' }
+    const { push, mark, ask } = outcome(facts)
+    console.log(`The agent said: ${said ? `${said.result}. ${said.why}` : 'nothing in the shape asked'}. It ${facts.changed ? 'changed files' : 'changed nothing'}.`)
+    console.log(push || ask ? `So: ${[push && 'push', mark && 'mark the model reached', ask && 'ask the model agent'].filter(Boolean).join(', ')}.` : 'So: a person reads why.')
+    appendFileSync(process.env.GITHUB_OUTPUT ?? '/dev/null', `push=${push}\nmark=${mark}\nask=${ask}\nstuck=${!push && !ask}\n`)
+  } else if (command === 'proof') {
+    const [base, out] = process.argv.slice(3)
+    const report = JSON.parse(run('npx', 'radical', 'diff', MODEL, '--since', base, '--format', 'json'))
+    const nodes = readNodes(MODEL)
+    const { here } = partOf(nodes, readRelations(MODEL), mappedBy('.radical/radical.json'))
+    const { verifies = [] } = JSON.parse(readFileSync('.radical/radical.json', 'utf8'))
+    const rows = scenariosToProve(report, here, nodes, verifies).flatMap(({ label, tests }) => {
+      if (!tests.length) return [{ label, state: 'none' }]
+      return tests.map((test) => {
+        // The test fails with the code of main, and passes with this branch's.
+        const gate = spawnSync('npx', ['radical', 'harden', '--gate', '--test', test, '--base', 'origin/main', '--runs', '1'], { encoding: 'utf8', maxBuffer: 64 << 20 })
+        const why = gate.status === 0 ? '' : `${gate.stdout}\n${gate.stderr}`.trim().split('\n').filter(Boolean).pop()?.slice(0, 200).replaceAll('|', '/')
+        return { label, test, state: gate.status === 0 ? 'proven' : 'not proven', why }
+      })
+    })
+    writeFileSync(out, `${proofText(rows)}\n`)
+    console.log(proofText(rows))
   } else if (command === 'neighbours') {
+    const branch = process.argv[3]
     for (const { name, repo: address } of JSON.parse(readFileSync('.agent/system/.radical/system.json', 'utf8')).repositories) {
-      if (address.includes(`/${repo}.git`)) continue
+      if (address.includes(`/${process.env.GITHUB_REPOSITORY}.git`)) continue
       const dir = join('.agent/providers', name)
-      execFileSync('git', ['clone', '--quiet', '--depth', '1', address, dir], { stdio: 'inherit' })
+      // The other side as this change has it, else as main has it.
+      const onBranch = spawnSync('git', ['ls-remote', '--exit-code', '--heads', address, branch]).status === 0
+      execFileSync('git', ['clone', '--quiet', '--depth', '1', ...(onBranch ? ['--branch', branch] : []), address, dir], { stdio: 'inherit' })
       rmSync(join(dir, '.git'), { recursive: true, force: true })
+      console.log(`${name}: ${onBranch ? branch : 'main'}.`)
     }
   } else {
-    console.error('next, outcome or neighbours?')
+    console.error('next, outcome, proof or neighbours?')
     process.exit(2)
   }
 }

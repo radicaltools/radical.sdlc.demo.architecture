@@ -1,7 +1,7 @@
 name: System
 
-# The loop of the whole system (pipeline/system.mjs): on a change of the model, when a repository
-# reaches a new commit of it, and every day.
+# The loop of the whole system (pipeline/system.mjs): when the change's branch moves (change.yml starts
+# this), when a repository has pushed (its reconcile.yml), on a push of the model to main, and every day.
 
 on:
   push:
@@ -17,12 +17,13 @@ concurrency:
 permissions:
   contents: read
   issues: write
+  actions: write
 
 jobs:
   system:
     name: Bring the repositories to the model
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:

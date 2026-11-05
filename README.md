@@ -9,30 +9,46 @@ building it: each repository's coding agent reads the whole model and builds its
 
 ## How a change gets through
 
-![A person opens a ticket. The model agent changes the model of the whole system in one pull request. A green Gate and a person's merge start the system loop, which reads what each repository has left and starts the Warehouse first, because the Shop calls it. Its coding agent builds its part, a green Gate and a merge start the loop again, and it starts the Shop. When nothing is left, the loop closes the ticket.](docs/sdlc.svg)
+![A person opens a ticket. The model agent models the change of the whole system on a branch, says on the ticket what it understood, and a review agent reads the change against the ticket. After a green Gate the system loop starts the Warehouse first, because the Shop calls it, then the Shop, each building on the same branch. A coding agent's question goes to the model agent, who answers in the model, and the loop builds again. When every Gate is green, the evidence goes on the ticket, a person accepts it all at once, and the loop merges the model first, then the code.](docs/sdlc.svg)
 
-Yellow is a person, violet an agent on Claude Code, and green has no AI and gives the same answer every time. The dark box is the Gate, the one required check.
+Yellow is a person, violet an agent on Claude Code, and green has no AI and gives the same answer every time. The dark boxes are the Gates, the one required check of each repository.
 
-The model on `main` is the state wanted, and agents bring the code to it. Each repository's
-`.radical/reconciled.json` names the commit of the model its code has reached, and what it still has
-to build is what changed in its part since then. The loop reads this again on every change of the
-model, whenever a repository reaches a new commit, and once a day, so a lost event loses nothing.
+A change lives on one branch, `change/<n>` after its ticket, here and in each repository it touches, and
+reaches `main` only when a person accepts the whole of it. So `main` describes what is built: the model and
+the code there agree. One change goes at a time, and the others wait in the queue.
 
-**Where a person comes in:**
+1. **A ticket** with the label `agent:implement`, here. It becomes the change, or waits in the queue
+   (`change:queued`).
+2. **The model agent** models the change of the whole system on the branch, both sides of it at once. What
+   it understood goes on the ticket, and nobody waits for an answer: a comment there turns it.
+3. **A review agent**, which did not make the change, reads it against the ticket: a side left out, a rule
+   nobody asked for, a contradiction. The model agent fixes what it found, once. Then the Gate checks the
+   model with `radical check`.
+4. **The loop** (`pipeline/system.mjs`) reads what of each repository's part is not built on its branch,
+   and starts the repositories in order: the Warehouse first, because the Shop calls it. Each gets one try
+   for each commit of the model.
+5. **The coding agents** build their part on their branch `change/<n>`, from `get_changes` alone, and the
+   pipeline asks each what became of its run, in a JSON shape. A question about the model goes to the model
+   agent, which answers by changing the model, and the loop builds again. Only a question the model agent
+   cannot answer goes to a person, on the ticket. A coding agent asks twice at most.
+6. **Each Gate** runs the tests, the sensors and `radical check` of its part. Its test of the two systems
+   together, `crosses`, takes the other side from the same branch. And each pull request carries the proof
+   of its tests: each test of a changed scenario fails with the code of `main` and passes with the branch's.
+7. **When everything is built and green**, the evidence goes on the ticket (`change:ready`): what changed in
+   the model, each pull request with its proof, and what the agents cost.
+8. **A person accepts it all** with the label `agent:accept`. The loop merges the model first, then the
+   code, closes the ticket, and starts the next in the queue.
 
-- **A model pull request.** Read and merge it. Use a merge commit, not a squash: the number of the ticket
-  at the end of the agent's commit is how the loop knows which ticket to close.
-- **A code pull request.** The Gate decides whether it can go in, and a person merges it.
-- **A draft pull request.** The coding agent built the code but has a question about the model. The
-  question is in its text and the Gate has read the code. Answer by marking it ready, or by
-  changing the model in a new ticket and closing the draft.
-- **A ticket `agent:stuck`, in the repository.** The agent built nothing, and says why. A new version of
-  the model gives it another try; each version gets one.
+**Where a person comes in:** the ticket, a question only a person can answer, a comment that turns what the
+model agent understood, a change `change:stuck` that the agents could not finish, and the acceptance.
+Nobody merges anything by hand.
 
-A question of the model agent goes on the ticket, and an answer in a comment starts it again.
+Once a day the loop also checks `main`: a repository whose code has not reached the model there gets a
+ticket in the queue.
 
 ## The first ticket
 
+It went through the earlier pipeline, where the model was merged on `main` first and the code followed.
 A customer whose order has shipped wants to know when it will arrive: [ticket #2](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/issues/2), "Estimated delivery date".
 It needs both repositories: the Warehouse has to keep the carrier's date, and the Shop has to show it.
 
@@ -57,6 +73,9 @@ pipeline/system.mjs      the loop: who has what left, who goes now
 pipeline/reconcile-code.mjs, .github/workflows/reconcile-code.yml   a repository's side of it
 pipeline/model-agent-whole-system.md   replaces what the standards' model agent says about other systems
 pipeline/crosses.mjs     the test of the two systems together
+pipeline/change.mjs, .github/workflows/change.yml   a change, from its ticket to its acceptance; the queue
+pipeline/review.mjs, pipeline/agents/model-review.md   the review of a model change against its ticket
+pipeline/said.mjs        asks an agent what became of its run, in a JSON shape
 docs/sdlc.svg            the diagram above
 ```
 
@@ -76,24 +95,28 @@ of those ADRs.
 ## The two together
 
 Each side's own tests use a stand-in for the other, so they cannot see a field named differently on each side.
-The sensor `crosses` can: in the Gate of a pull request it runs that repository's code and the other's `main`, with
+The sensor `crosses` can: in the Gate of a pull request it runs that repository's code and the other's, from the same change's branch or else `main`, with
 only the carrier standing in, and sends an order through every call the Shop makes to the Warehouse. It checks that
 what the Warehouse answers comes out of the Shop. It takes seconds and no AI.
 
-So a Warehouse pull request that breaks the Shop on `main` is red in its own Gate, and a rename goes in steps: add
-the new name, move the Shop, then remove the old one.
+Both sides of a change are tested together and merged together, so a rename of a field can go in one change.
+The Warehouse builds first, and its Gate first runs with the Shop's `main`; once every repository has built
+the change, the loop runs each Gate once more, with every side on the branch. A change that breaks the Shop
+with nothing for the Shop on the branch stays red.
 
 ## Not here yet
 
 - **Deployment, nightly runs, updates of pins and the testing agent.** This demo goes from a ticket to
   merged code.
 - **Versions across repositories.** The Warehouse is not pinned in the Shop: the model orders the work, and
-  the sensors `warehouse-contract` and `crosses` read the other side's `main`. So running a Gate again can
-  give another answer once the other side has changed.
+  the sensors `warehouse-contract` and `crosses` read the other side's branch or `main`. So running a Gate
+  again can give another answer once the other side has changed.
 - **Support in the product.** The part is worked out by `pipeline/part.mjs`, which reads the model's files
   directly, and Radical Studio and the MCP tools know nothing of it. Two things are also changed on
   the fly: the model agent's skill in `tools/standards.mjs`, and the commands the coding agent checks
-  its work with, in `reconcile-code.yml`.
+  its work with, in `reconcile-code.yml`. The standards' model and coding agents report in prose, so
+  `pipeline/said.mjs` asks each once more, in its own session, what became of its run, in a JSON shape.
+- **More than one change at a time.** The next waits until the open one is accepted or closed.
 
 ## Run it on your machine
 

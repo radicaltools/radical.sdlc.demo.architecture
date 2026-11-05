@@ -1,34 +1,54 @@
 name: Bring the code to the model
 
 # A reusable workflow. A repository of the system calls it from a file of a few lines, and it runs on
-# that repository's checkout. Its coding agent reads the whole model, with its history, in
-# .radical/model; the gate judges its part, in .agent/part. Nothing here merges: the merge moves
-# .radical/reconciled.json, the repository says so to this one's system.yml, and that looks again.
+# that repository's checkout, on the branch change/<n> of the change. Its coding agent reads the whole
+# model as that branch has it here, with its history, in .radical/model; the gate judges its part, in
+# .agent/part. Nothing here merges: a person accepts the whole change on its ticket here.
 #
-# The agent step holds only the Claude credential. The steps after it run no AI: they commit under
-# the agent's name and push with AGENT_TOKEN, because a push made with GITHUB_TOKEN would start no gate.
+# The coding agent's code goes up on the branch, in a draft pull request with the proof of its tests.
+# What it says became of its run (pipeline/said.mjs) decides the rest: a question goes to the model agent
+# on the ticket, and a run that could not finish goes to a person there. Either way this repository then
+# tells system.yml here to look again.
+#
+# The agent step holds only the Claude credential, and so does the step that asks it what became of its
+# run. The steps after them run no AI: they commit under the agent's name and push with AGENT_TOKEN,
+# because a push made with GITHUB_TOKEN would start no gate.
 
 on:
   workflow_call:
+    inputs:
+      change:
+        description: The number of the change's ticket in the architecture repository
+        type: string
+        required: true
 
 permissions:
   contents: read
   issues: read
   pull-requests: read
 
+env:
+  ARCHITECTURE: radicaltools/radical.tools.sdlc.demo.3.architecture
+
 jobs:
   reconcile:
     name: Bring the code to the model
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
+    env:
+      CHANGE: ${{ inputs.change }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
           persist-credentials: false
-      - name: The whole model, as main has it
-        run: node tools/model.mjs --whole
+      - name: On the change's branch
+        run: |
+          case "$CHANGE" in ''|*[!0-9]*) echo "::error::Not a change: $CHANGE"; exit 1 ;; esac
+          if git rev-parse -q --verify "origin/change/$CHANGE" >/dev/null; then git checkout -B "change/$CHANGE" "origin/change/$CHANGE"; else git checkout -B "change/$CHANGE"; fi
+      - name: The whole model, as the change has it
+        run: node tools/model.mjs --whole --ref "change/$CHANGE"
       - name: The standards, at the version the model pins
         run: node tools/standards.mjs
       - uses: ./.standards/.github/actions/setup
@@ -36,17 +56,10 @@ jobs:
           claude: 'true'
       - name: Look at the gap
         id: look
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: node .agent/system/pipeline/reconcile-code.mjs next
-      - name: On its branch
+      - name: What the other repositories have, on this change or on main
         if: steps.look.outputs.step == 'work'
-        env:
-          BRANCH: ${{ steps.look.outputs.branch }}
-        run: git checkout -B "$BRANCH"
-      - name: What the other repositories have now
-        if: steps.look.outputs.step == 'work'
-        run: node .agent/system/pipeline/reconcile-code.mjs neighbours
+        run: node .agent/system/pipeline/reconcile-code.mjs neighbours "change/$CHANGE"
       - name: The agent checks its work as the gate will
         if: steps.look.outputs.step == 'work'
         run: sed -i 's#radical sense run --trigger#radical sense run --folder .agent/part --trigger#; s#radical check .radical/model#radical check .agent/part#' .claude/skills/coding-agent/SKILL.md
@@ -58,38 +71,73 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AGENT_MODEL: ${{ vars.AGENT_MODEL }}
           BASE: ${{ steps.look.outputs.base }}
-        run: node .standards/pipeline/tools/run-agent.mjs coding-agent mode=implement "base=$BASE"
-      - name: What became of it
+        run: |
+          set -o pipefail
+          node .standards/pipeline/tools/run-agent.mjs coding-agent mode=implement "base=$BASE" | tee .agent/agent.log
+      - name: What the agent says became of it
+        if: steps.look.outputs.step == 'work' && steps.agent.outcome == 'success'
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AGENT_MODEL: ${{ vars.AGENT_MODEL }}
+        run: node .agent/system/pipeline/said.mjs coding-agent .agent/said.json
+      - name: What becomes of it
         id: outcome
         if: steps.look.outputs.step == 'work'
         env:
           AGENT: ${{ steps.agent.outcome }}
-        run: node .agent/system/pipeline/reconcile-code.mjs outcome .agent/report.md "$AGENT"
+        run: node .agent/system/pipeline/reconcile-code.mjs outcome .agent/said.json "$AGENT"
       - name: Commit the code
-        if: steps.outcome.outputs.act == 'pull'
-        run: .standards/pipeline/tools/commit-as.sh coding-agent "Implement the model"
+        if: steps.outcome.outputs.push == 'true'
+        env:
+          DESIRED: ${{ steps.look.outputs.desired }}
+        run: .standards/pipeline/tools/commit-as.sh coding-agent "Implement the model at ${DESIRED:0:7}"
       - name: Say which model the code has reached
-        if: steps.outcome.outputs.act == 'pull'
+        if: steps.outcome.outputs.mark == 'true'
         env:
           DESIRED: ${{ steps.look.outputs.desired }}
         run: |
           node .standards/pipeline/tools/reconcile.mjs mark "$DESIRED"
           .standards/pipeline/tools/commit-as.sh pipeline "The code reaches the model at ${DESIRED:0:7}"
-      - name: Push and open the pull request
-        if: steps.outcome.outputs.act == 'pull'
+      - name: The proof of its tests
+        if: steps.outcome.outputs.mark == 'true'
+        env:
+          BASE: ${{ steps.look.outputs.base }}
+        run: node .agent/system/pipeline/reconcile-code.mjs proof "$BASE" .agent/proof.md
+      - name: Push, and its pull request
+        if: steps.outcome.outputs.push == 'true'
         env:
           GH_TOKEN: ${{ secrets.AGENT_TOKEN }}
-          BRANCH: ${{ steps.look.outputs.branch }}
-          DESIRED: ${{ steps.look.outputs.desired }}
-          CLOSES: ${{ steps.look.outputs.closes }}
-          DRAFT: ${{ steps.outcome.outputs.draft }}
         run: |
-          for ticket in $CLOSES; do printf '\n\nCloses #%s\n' "$ticket" >> .agent/report.md; done
-          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
-          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --title "Implement the model at ${DESIRED:0:7}" --body-file .agent/report.md $(if [ "$DRAFT" = "true" ]; then echo --draft; fi)
-      - name: A person reads why not
-        if: steps.outcome.outputs.act == 'ask'
+          {
+            cat .agent/report.md 2>/dev/null
+            if [ -f .agent/said.json ]; then printf '\n\n## What the agent says\n\n'; node -e "const s=require('./.agent/said.json');console.log('**'+s.result+'**: '+s.why);for(const q of s.questions)console.log('- '+q)"; fi
+            if [ -f .agent/proof.md ]; then printf '\n## Proof\n\n'; cat .agent/proof.md; fi
+            printf '\n## Agent runs\n\n'; grep -E '^coding-agent: .*\$[0-9]' .agent/agent.log | sed 's/^/- /'
+            printf '\nPart of %s#%s\n' "$ARCHITECTURE" "$CHANGE"
+          } > .agent/pr.md
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/change/$CHANGE"
+          open="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "change/$CHANGE" --state open --json number -q '.[0].number')"
+          if [ -n "$open" ]; then
+            gh pr edit "$open" --repo "$GITHUB_REPOSITORY" --body-file .agent/pr.md
+          else
+            title="$(gh issue view "$CHANGE" --repo "$ARCHITECTURE" --json title -q .title)"
+            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "change/$CHANGE" --draft --title "Change #$CHANGE: $title" --body-file .agent/pr.md
+          fi
+      - name: Ask the model agent, or a person
+        if: steps.outcome.outputs.ask == 'true' || steps.outcome.outputs.stuck == 'true'
         env:
           GH_TOKEN: ${{ secrets.AGENT_TOKEN }}
-          DESIRED: ${{ steps.look.outputs.desired }}
-        run: node .standards/pipeline/tools/reconcile.mjs stuck "$DESIRED" .agent/report.md
+          KIND: ${{ steps.outcome.outputs.ask == 'true' && 'question' || 'stuck' }}
+        run: |
+          if [ "$KIND" = question ]; then
+            text="$(node -e "const s=require('./.agent/said.json');console.log(s.why);for(const q of s.questions)console.log('- '+q)")"
+          else
+            text="$( (cat .agent/said.json 2>/dev/null; echo; tail -c 6000 .agent/report.md 2>/dev/null) )"
+          fi
+          gh workflow run change.yml --repo "$ARCHITECTURE" --ref main -f "ticket=$CHANGE" -f "from=${GITHUB_REPOSITORY##*.}" -f "kind=$KIND" -f "text=$text"
+      - name: Tell the architecture repository
+        if: steps.outcome.outputs.push == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.AGENT_TOKEN }}
+        run: gh workflow run system.yml --repo "$ARCHITECTURE" --ref main
