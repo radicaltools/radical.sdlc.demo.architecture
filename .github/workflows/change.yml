@@ -183,6 +183,8 @@ jobs:
           printf '\n\nFor #%s\n' "$TICKET" >> .agent/model-pr.md
           open="$(GH_TOKEN="$AGENT_TOKEN" gh pr list --repo "$GITHUB_REPOSITORY" --head "change/$TICKET" --state open --json number -q '.[0].number')"
           if [ -n "$open" ]; then
+            GH_TOKEN="$AGENT_TOKEN" gh pr view "$open" --repo "$GITHUB_REPOSITORY" --json body -q .body > .agent/earlier-pr.md
+            node pipeline/change.mjs runs .agent/earlier-pr.md .agent/model-pr.md
             GH_TOKEN="$AGENT_TOKEN" gh pr edit "$open" --repo "$GITHUB_REPOSITORY" --body-file .agent/model-pr.md
           elif [ "$RESULT" = modelled ]; then
             GH_TOKEN="$AGENT_TOKEN" gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "change/$TICKET" --draft --title "Change #$TICKET: $TITLE" --body-file .agent/model-pr.md
@@ -218,6 +220,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Say so at once
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TICKET: ${{ needs.way.outputs.ticket }}
+          SENDER: ${{ github.event.sender.login }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body "Accepted by @$SENDER. Merging every pull request of the change, the model first: $RUN"
       - uses: actions/checkout@v4
         with:
           persist-credentials: false

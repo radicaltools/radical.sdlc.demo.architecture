@@ -69,13 +69,17 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   }
   const { agentEnvironment } = await import(join(process.cwd(), '.standards/pipeline/tools/agents.mjs'))
   const { DEFAULT_MODEL } = await import(join(process.cwd(), '.standards/pipeline/tools/run-agent.mjs'))
+  let cost = 0
+  const spent = () => console.log(`${agent}-answer: $${cost.toFixed(3)}`)
   for (let attempt = 1; attempt <= 2; attempt++) {
     const answer = spawnSync('claude', ['-p', askOf(agent), '--continue', '--model', process.env.AGENT_MODEL || DEFAULT_MODEL,
       '--max-turns', '5', '--output-format', 'json', '--json-schema', JSON.stringify(schemaOf(agent))], {
       env: agentEnvironment(process.env), encoding: 'utf8', maxBuffer: 16 << 20, stdio: ['ignore', 'pipe', 'inherit'],
     })
+    try { cost += JSON.parse(answer.stdout).total_cost_usd ?? 0 } catch {}
     const said = saidIn(answer.stdout ?? '', agent)
     if (said) {
+      spent()
       writeFileSync(out, `${JSON.stringify(said, null, 2)}\n`)
       console.log(`The ${agent} says: ${said.result}. ${said.why}`)
       for (const question of said.questions) console.log(`  - ${question}`)
@@ -83,4 +87,5 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     }
     console.log(`Try ${attempt}: the ${agent} said nothing in the shape asked.`)
   }
+  spent()
 }

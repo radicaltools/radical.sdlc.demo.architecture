@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { costsIn, dependenciesOf, evidence, sectionOf, startMark, toStart, triedIn } from '../system.mjs'
+import { sectionOf } from '../change.mjs'
+import { costsIn, dependenciesOf, evidence, startMark, toStart, triedIn } from '../system.mjs'
 
 const built = new Map([['warehouse', new Set(['stock', 'dispatch'])], ['shop', new Set(['orders', 'pricing'])]])
 const needs = dependenciesOf([
