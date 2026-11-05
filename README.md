@@ -9,15 +9,9 @@ building it: each repository's coding agent reads the whole model and builds its
 
 ## How a change gets through
 
-```
-a ticket here, labelled agent:implement
-  → the model agent changes the whole model, in one pull request; a person merges it
-  → system.yml reads what each repository has not built, and starts those it can:
-    one that calls another goes after it
-  → that repository's coding agent reads the whole model and proposes its part; a person merges it
-  → the repository tells system.yml, which starts the next one
-  → when no repository has anything left, the ticket closes
-```
+![A person opens a ticket. The model agent changes the model of the whole system in one pull request. A green Gate and a person's merge start the system loop, which reads what each repository has left and starts the Warehouse first, because the Shop calls it. Its coding agent builds its part, a green Gate and a merge start the loop again, and it starts the Shop. When nothing is left, the loop closes the ticket.](docs/sdlc.svg)
+
+Yellow is a person, violet an agent on Claude Code, and green has no AI and gives the same answer every time. The dark box is the Gate, the one required check.
 
 The model on `main` is the state wanted, and agents bring the code to it. Each repository's
 `.radical/reconciled.json` names the commit of the model its code has reached, and what it still has
@@ -62,6 +56,7 @@ pipeline/part.mjs        one repository's part of the model
 pipeline/system.mjs      the loop: who has what left, who goes now
 pipeline/reconcile-code.mjs, .github/workflows/reconcile-code.yml   a repository's side of it
 pipeline/model-agent-whole-system.md   replaces what the standards' model agent says about other systems
+docs/sdlc.svg            the diagram above
 ```
 
 A repository holds no model. It keeps `.radical/radical.json` (which folder builds which element,
