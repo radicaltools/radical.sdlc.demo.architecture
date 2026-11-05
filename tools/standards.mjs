@@ -7,7 +7,7 @@
 //   node tools/standards.mjs            fetch them
 //   node tools/standards.mjs --check    only say whether the workflows name the pin
 import { spawnSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { isAbsolute, join, resolve } from 'node:path'
 
 const MODEL = '.radical/model'
@@ -37,6 +37,13 @@ if (existsSync(skills)) {
   mkdirSync('.claude/skills', { recursive: true })
   cpSync(skills, '.claude/skills', { recursive: true })
 }
+// The standards' model agent works on the model of one system, and hands on what another has to do.
+// Here it holds them all. Fails if the skill no longer says what this replaces.
+const agent = '.claude/skills/model-agent/SKILL.md'
+const skill = readFileSync(agent, 'utf8')
+const whole = skill.replace(/   The model holds elements of other models[\s\S]*?(?=2\. \*\*A ticket\.\*\*)/, readFileSync('pipeline/model-agent-whole-system.md', 'utf8'))
+if (whole === skill) throw new Error(`${agent} does not say what tools/standards.mjs replaces`)
+writeFileSync(agent, whole)
 console.log(`Standards at ${dep.ref} in .standards/.`)
 
 for (const { name, repo } of JSON.parse(readFileSync('.radical/system.json', 'utf8')).repositories) {
