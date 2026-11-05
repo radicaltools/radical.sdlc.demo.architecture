@@ -64,7 +64,7 @@ jobs:
         if: steps.look.outputs.step == 'work'
         env:
           AGENT: ${{ steps.agent.outcome }}
-        run: node .standards/pipeline/tools/reconcile.mjs outcome .agent/report.md "$AGENT"
+        run: node .agent/system/pipeline/reconcile-code.mjs outcome .agent/report.md "$AGENT"
       - name: Commit the code
         if: steps.outcome.outputs.act == 'pull'
         run: .standards/pipeline/tools/commit-as.sh coding-agent "Implement the model"
@@ -81,9 +81,12 @@ jobs:
           GH_TOKEN: ${{ secrets.AGENT_TOKEN }}
           BRANCH: ${{ steps.look.outputs.branch }}
           DESIRED: ${{ steps.look.outputs.desired }}
+          CLOSES: ${{ steps.look.outputs.closes }}
+          DRAFT: ${{ steps.outcome.outputs.draft }}
         run: |
+          for ticket in $CLOSES; do printf '\n\nCloses #%s\n' "$ticket" >> .agent/report.md; done
           git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
-          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --title "Implement the model at ${DESIRED:0:7}" --body-file .agent/report.md
+          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --title "Implement the model at ${DESIRED:0:7}" --body-file .agent/report.md $(if [ "$DRAFT" = "true" ]; then echo --draft; fi)
       - name: A person reads why not
         if: steps.outcome.outputs.act == 'ask'
         env:
