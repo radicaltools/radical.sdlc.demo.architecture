@@ -1,13 +1,11 @@
 # radical.tools.sdlc.demo.3.architecture
 
-**One system, one model, several repositories.** This repository holds the model of the whole system.
-The [Warehouse](https://github.com/radicaltools/radical.tools.sdlc.demo.3.warehouse) and the
-[Shop](https://github.com/radicaltools/radical.tools.sdlc.demo.3.shop) build it. The company's
-standards stay a dependency, in [demo.2](https://github.com/radicaltools/radical.tools.sdlc.demo.2.standards).
+**One system, one model, several repositories.** A shop sells goods and a warehouse sends them. They are
+built in two repositories, the [Warehouse](https://github.com/radicaltools/radical.tools.sdlc.demo.3.warehouse) and the [Shop](https://github.com/radicaltools/radical.tools.sdlc.demo.3.shop), and this repository holds the
+model of the whole system.
 
-In [demo.2](https://github.com/radicaltools/radical.tools.sdlc.demo.2.standards#readme) each system has
-its own model, and a change across two systems travels as tickets between their agents. Here one agent
-sees the whole system and changes it at once. The work is divided only for building it.
+An agent sees the whole system and changes it at once, in one pull request. The work is divided only for
+building it: each repository's coding agent reads the whole model and builds its own part.
 
 ## How a change gets through
 
@@ -39,6 +37,22 @@ model, whenever a repository reaches a new commit, and once a day, so a lost eve
 
 A question of the model agent goes on the ticket, and an answer in a comment starts it again.
 
+## The first ticket
+
+A customer whose order has shipped wants to know when it will arrive: [ticket #2](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/issues/2), "Estimated delivery date".
+It needs both repositories: the Warehouse has to keep the carrier's date, and the Shop has to show it.
+
+| Step | What happened |
+|---|---|
+| Model of both sides | [#5](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/5) changed the Warehouse's and the Shop's requirements in one pull request. An earlier try, [#3](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/3), modelled only the Shop and was closed; [#4](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/4) fixed why |
+| The Warehouse goes first | The loop started it, and kept the Shop waiting |
+| A gap in the model | Its agent asked what the carrier answers, and what if it gives no date. A person decided: the parcel goes on, and the date is null. That is [#6](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/issues/6) and [#7](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/7) |
+| A contradiction in the model | Its agent found 200 and 201 for one answer: [#9](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/issues/9) and [#10](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/10). Those two questions threw built code away, so [#8](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/8) now keeps it as a draft |
+| The code | [The Warehouse's pull request](https://github.com/radicaltools/radical.tools.sdlc.demo.3.warehouse/pull/3), then, started by its merge, [the Shop's](https://github.com/radicaltools/radical.tools.sdlc.demo.3.shop/pull/1), at the first try and with no question |
+| The end | The loop found nothing left, and closed the three tickets |
+
+It took 8 agent runs and about $0.65, of which about $0.28 went on runs thrown away while the pipeline was being fixed.
+
 ## What is where
 
 ```
@@ -65,6 +79,9 @@ of those ADRs.
 
 ## Not here yet
 
+- **A test of the two together.** Each side has its own tests, and the Shop's sensor `warehouse-contract` checks
+  the path of a call and its key, not the fields of the answer. A field named differently on each side would
+  pass every Gate.
 - **Deployment, nightly runs, updates of pins and the testing agent.** This demo goes from a ticket to
   merged code.
 - **Versions across repositories.** The Warehouse is not pinned in the Shop: the model orders the work, and
