@@ -1,0 +1,47 @@
+name: Pull request checks
+
+# The one required check here. The model of the whole system has to hold together; each repository's
+# gate judges its own part against its tests when its code gets there. No AI runs in it.
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  gate:
+    name: Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE: ${{ github.base_ref || 'main' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: The standards, and the system's repositories
+        run: node tools/standards.mjs
+      - uses: ./.standards/.github/actions/setup
+      - name: The pipeline and the model name one version of the standards
+        run: node tools/standards.mjs --check
+      - run: npm test
+      - name: Agents stayed in their scope
+        run: node .standards/pipeline/tools/agent-scope.mjs "origin/$BASE"
+      - name: The model holds together
+        run: npx radical check .radical/model --format github
+      - name: Say what changed in the model
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet "origin/$BASE...HEAD" -- .radical/model; then echo "The model did not change."; exit 0; fi
+          { echo '### Model changes'; echo; echo '```'; npx radical diff .radical/model --since "origin/$BASE"; echo '```'; } > model-changes.md
+          gh pr comment "$PR" --edit-last --create-if-none --body-file model-changes.md

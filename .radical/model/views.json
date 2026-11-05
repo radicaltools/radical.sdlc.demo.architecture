@@ -1,0 +1,1470 @@
+[
+  {
+    "continuousLayout": true,
+    "folder": "Shop/C4",
+    "id": "0e80f05c-ada1-41bd-95ad-7f44190db6a3",
+    "kind": "static",
+    "layoutConstraints": [],
+    "name": "System context",
+    "nodeIds": [
+      "d254177a-14c6-41df-8658-b5094e1828dd",
+      "2e6213dd-bca8-4d0f-881f-5d38fc0519ad",
+      "c9564efd-da08-460c-ad95-d11f77748691"
+    ],
+    "pipeline": {
+      "edges": "all",
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "person",
+                "system"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {
+      "2e6213dd-bca8-4d0f-881f-5d38fc0519ad": {
+        "height": 170,
+        "width": 150,
+        "x": 0,
+        "y": 5
+      },
+      "c9564efd-da08-460c-ad95-d11f77748691": {
+        "height": 410,
+        "width": 1000,
+        "x": 241.6669921875,
+        "y": 0
+      },
+      "d254177a-14c6-41df-8658-b5094e1828dd": {
+        "height": 410,
+        "width": 520,
+        "x": 57.6669921875,
+        "y": 308.3330078125
+      }
+    },
+    "viewpoint": "system-context",
+    "viewport": {
+      "x": 333.1818293144851,
+      "y": 281.90528916832636,
+      "zoom": 0.5520857057572188
+    }
+  },
+  {
+    "folder": "Shop/C4",
+    "id": "ecac2936-004f-4659-bb3f-a30bb11a0050",
+    "kind": "static",
+    "name": "Shop components",
+    "nodeIds": [
+      "36f59156-1f85-44e4-884f-00b6739e281b",
+      "d1a0f43b-00be-4c90-8730-e2923c73f475",
+      "7f3b8475-e9c8-457c-bfdb-75bcfb1f87be",
+      "80b286d3-fedc-4e07-9a40-e98943808c44",
+      "cb095a86-daf0-4e97-92ea-df25a18dafc2",
+      "cae84d7c-e4be-4f47-b354-58a955864ae3",
+      "d4fb782d-595f-40cc-bed8-570cebc15a1f"
+    ],
+    "pipeline": {
+      "edges": "all",
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "container",
+                "webapp",
+                "component",
+                "database",
+                "queue"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {
+      "36f59156-1f85-44e4-884f-00b6739e281b": {
+        "height": 260,
+        "width": 240,
+        "x": 0,
+        "y": 0
+      },
+      "7f3b8475-e9c8-457c-bfdb-75bcfb1f87be": {
+        "height": 260,
+        "width": 240,
+        "x": 860.1484375,
+        "y": 0
+      },
+      "80b286d3-fedc-4e07-9a40-e98943808c44": {
+        "height": 200,
+        "width": 300,
+        "x": 394.1484375,
+        "y": 317.599609375
+      },
+      "cae84d7c-e4be-4f47-b354-58a955864ae3": {
+        "height": 120,
+        "width": 200,
+        "x": 20,
+        "y": 120
+      },
+      "cb095a86-daf0-4e97-92ea-df25a18dafc2": {
+        "height": 120,
+        "width": 200,
+        "x": 20,
+        "y": 120
+      },
+      "d1a0f43b-00be-4c90-8730-e2923c73f475": {
+        "height": 260,
+        "width": 240,
+        "x": 424.1484375,
+        "y": 0
+      },
+      "d254177a-14c6-41df-8658-b5094e1828dd": {
+        "height": 547.599609375,
+        "width": 1130.1484375,
+        "x": 0,
+        "y": 0
+      },
+      "d4fb782d-595f-40cc-bed8-570cebc15a1f": {
+        "height": 120,
+        "width": 200,
+        "x": 20,
+        "y": 120
+      }
+    },
+    "viewpoint": "components",
+    "viewport": {
+      "x": 341.4247224447828,
+      "y": 359.60203222602274,
+      "zoom": 0.6109635138307729
+    }
+  },
+  {
+    "folder": "Shop/Domain",
+    "id": "14fb1bda-4011-468f-8563-a647b70129d0",
+    "kind": "static",
+    "name": "Domain model",
+    "nodeIds": [
+      "5afdeeaf-b99e-494b-a162-40c121570db9",
+      "80721fd5-8d64-41fb-acee-04273387a479",
+      "8e56e0a3-d7d9-4dce-96e8-74979390d8bb",
+      "f2a1d85c-de79-4111-952f-0be35819ae07",
+      "f6d81740-86c2-4018-a915-8f63c9088103",
+      "774dd046-eae3-4f95-a955-b24eda0b4e58"
+    ],
+    "positions": {
+      "5afdeeaf-b99e-494b-a162-40c121570db9": {
+        "height": 220,
+        "width": 458,
+        "x": 0,
+        "y": 0
+      },
+      "774dd046-eae3-4f95-a955-b24eda0b4e58": {
+        "height": 220,
+        "width": 360,
+        "x": 327.3330078125,
+        "y": 280
+      },
+      "80721fd5-8d64-41fb-acee-04273387a479": {
+        "height": 56,
+        "width": 170,
+        "x": 258,
+        "y": 120
+      },
+      "8e56e0a3-d7d9-4dce-96e8-74979390d8bb": {
+        "height": 56,
+        "width": 170,
+        "x": 30,
+        "y": 120
+      },
+      "f2a1d85c-de79-4111-952f-0be35819ae07": {
+        "height": 56,
+        "width": 170,
+        "x": 30,
+        "y": 120
+      },
+      "f6d81740-86c2-4018-a915-8f63c9088103": {
+        "height": 220,
+        "width": 360,
+        "x": 499,
+        "y": 0
+      }
+    },
+    "viewport": {
+      "x": 473.375,
+      "y": 477.5,
+      "zoom": 1
+    }
+  },
+  {
+    "folder": "Shop/States",
+    "id": "eead9329-4a63-47bc-8778-0cb28742d1a3",
+    "kind": "static",
+    "name": "State machines",
+    "nodeIds": [],
+    "pipeline": {
+      "edges": "all",
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "state-machine",
+                "state",
+                "pseudostate",
+                "event"
+              ]
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "entity"
+              ],
+              "via": {
+                "direction": "out",
+                "relationType": "lifecycle-of"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {},
+    "viewpoint": "state-machine"
+  },
+  {
+    "expandedNodeIds": [
+      "1a3eb5ff-618d-4eb7-be12-7c10b3351369"
+    ],
+    "folder": "Shop/States",
+    "id": "72c9fee7-00e4-4777-865b-91a993b48097",
+    "kind": "static",
+    "name": "Order lifecycle",
+    "nodeIds": [],
+    "partOf": "eead9329-4a63-47bc-8778-0cb28742d1a3",
+    "pipeline": {
+      "edges": "all",
+      "levels": [
+        {
+          "filters": [
+            {
+              "kind": "within",
+              "nodeId": "1a3eb5ff-618d-4eb7-be12-7c10b3351369",
+              "self": true
+            }
+          ],
+          "ways": [
+            {
+              "types": [
+                "state-machine",
+                "state",
+                "pseudostate",
+                "event"
+              ]
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "entity"
+              ],
+              "via": {
+                "direction": "out",
+                "relationType": "lifecycle-of"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {
+      "011412d4-b8ac-4b71-b74f-d8b73ffc7816": {
+        "height": 36,
+        "width": 36,
+        "x": 362,
+        "y": 128
+      },
+      "04f16171-9efc-4aa3-8440-f8c357af47b9": {
+        "height": 220,
+        "width": 320,
+        "x": 220,
+        "y": 470
+      },
+      "1a3eb5ff-618d-4eb7-be12-7c10b3351369": {
+        "height": 976,
+        "width": 954.1591796875,
+        "x": 254.1591796875,
+        "y": 0
+      },
+      "261c8d2e-071f-4ff3-a9b8-ec44996ae099": {
+        "height": 220,
+        "width": 320,
+        "x": 220,
+        "y": 213
+      },
+      "40061898-2dc7-479a-877c-04b6f1431c7f": {
+        "height": 52,
+        "width": 170,
+        "x": 30,
+        "y": 120
+      },
+      "4982e48a-9cfc-4dd8-8b19-b67a5e1168dd": {
+        "height": 52,
+        "width": 170,
+        "x": 30,
+        "y": 208.5
+      },
+      "5afdeeaf-b99e-494b-a162-40c121570db9": {
+        "height": 220,
+        "width": 360,
+        "x": 0,
+        "y": 460
+      },
+      "76fd9fb8-0967-4da1-ac44-e61dccdc74cb": {
+        "height": 52,
+        "width": 170,
+        "x": 30,
+        "y": 386
+      },
+      "80721fd5-8d64-41fb-acee-04273387a479": {
+        "height": 56,
+        "width": 170,
+        "x": 0,
+        "y": 0
+      },
+      "84fb387d-6a79-4f41-8173-4e463ac210bd": {
+        "height": 220,
+        "width": 320,
+        "x": 604.1591796875,
+        "y": 214
+      },
+      "8769a187-7500-4ead-9921-0f2d11898ef6": {
+        "height": 52,
+        "width": 170,
+        "x": 30,
+        "y": 297
+      },
+      "9f89ae90-f3c9-4a6c-bb05-3c8af0ae4587": {
+        "height": 220,
+        "width": 320,
+        "x": 604.1591796875,
+        "y": 726
+      },
+      "ac879211-cef4-402b-8682-122077d69ea8": {
+        "height": 220,
+        "width": 320,
+        "x": 604.1591796875,
+        "y": 470
+      }
+    },
+    "subject": "1a3eb5ff-618d-4eb7-be12-7c10b3351369",
+    "viewpoint": "state-machine",
+    "viewport": {
+      "x": 336.7804456904858,
+      "y": 294.02882030988485,
+      "zoom": 0.5777901084429375
+    }
+  },
+  {
+    "folder": "Shop/C4",
+    "id": "cfdd7920-a50a-4332-96c8-c70c2c58b50e",
+    "name": "Shop containers",
+    "nodeIds": [
+      "d254177a-14c6-41df-8658-b5094e1828dd",
+      "36f59156-1f85-44e4-884f-00b6739e281b",
+      "d1a0f43b-00be-4c90-8730-e2923c73f475",
+      "7f3b8475-e9c8-457c-bfdb-75bcfb1f87be",
+      "80b286d3-fedc-4e07-9a40-e98943808c44",
+      "2e6213dd-bca8-4d0f-881f-5d38fc0519ad",
+      "6ef298ce-4568-470b-898f-2e02d8aa0217",
+      "a3739b2d-e64e-4363-b010-c9482f4d06c5"
+    ],
+    "positions": {
+      "2e6213dd-bca8-4d0f-881f-5d38fc0519ad": {
+        "height": 170,
+        "width": 150,
+        "x": 493.4541015625,
+        "y": 0
+      },
+      "36f59156-1f85-44e4-884f-00b6739e281b": {
+        "height": 260,
+        "width": 255,
+        "x": 442.759765625,
+        "y": 120
+      },
+      "6ef298ce-4568-470b-898f-2e02d8aa0217": {
+        "height": 260,
+        "width": 240,
+        "x": 0,
+        "y": 246.2001953125
+      },
+      "7f3b8475-e9c8-457c-bfdb-75bcfb1f87be": {
+        "height": 260,
+        "width": 240,
+        "x": 30,
+        "y": 120
+      },
+      "80b286d3-fedc-4e07-9a40-e98943808c44": {
+        "height": 200,
+        "width": 300,
+        "x": 412.759765625,
+        "y": 337.599609375
+      },
+      "a3739b2d-e64e-4363-b010-c9482f4d06c5": {
+        "height": 260,
+        "width": 240,
+        "x": 0,
+        "y": 0
+      },
+      "d1a0f43b-00be-4c90-8730-e2923c73f475": {
+        "height": 260,
+        "width": 255,
+        "x": 866.908203125,
+        "y": 120
+      },
+      "d254177a-14c6-41df-8658-b5094e1828dd": {
+        "height": 567.599609375,
+        "width": 1136.908203125,
+        "x": 0,
+        "y": 240
+      }
+    },
+    "viewport": {
+      "x": 338.5145308239868,
+      "y": 267.18687250166386,
+      "zoom": 0.5901764308250874
+    }
+  },
+  {
+    "folder": "Shop/Requirements",
+    "id": "b0cc3707-6c7a-41e1-87ec-f46713dab5fe",
+    "kind": "table",
+    "name": "Traceability",
+    "nodeIds": [],
+    "pipeline": {
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "need"
+              ]
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "requirement"
+              ],
+              "via": {
+                "direction": "in",
+                "relationType": "derives"
+              }
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "scenario"
+              ],
+              "via": {
+                "direction": "in",
+                "relationType": "verifies"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {}
+  },
+  {
+    "folder": "Shop/Requirements",
+    "id": "bcaaa68e-d470-420f-8970-fb10b262f079",
+    "kind": "table",
+    "name": "Requirement coverage",
+    "nodeIds": [],
+    "pipeline": {
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "requirement"
+              ]
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "scenario"
+              ],
+              "via": {
+                "direction": "in",
+                "relationType": "verifies"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {}
+  },
+  {
+    "folder": "Shop/Decisions",
+    "id": "d0cfb0e4-5356-42e0-ac7b-8177296de0c4",
+    "kind": "table",
+    "name": "Decisions",
+    "nodeIds": [
+      "418761d0-e97a-4671-90d8-e146f31da486",
+      "cd378e8c-8803-4243-9f08-26340dabef81",
+      "3bccf1bf-6e43-4cf7-a8e9-12d1567e935a",
+      "18bff412-316e-4d5a-913b-e98827ba88c0",
+      "8b5377c1-9807-4e33-b9fb-bd436da70723",
+      "af6ef5a8-e222-492d-8427-2fb929b3a8ea",
+      "b28e5aaa-5336-48ae-96f5-00023d2c6288",
+      "a76084a8-7513-4d57-b72d-183f5a52be8b",
+      "9e515080-0dc7-486c-8cd3-74cd74e090fe",
+      "dbf9b1ec-94ee-4906-87a4-8a1d140d77bd",
+      "0e7b8def-f0a4-49d2-892d-27a20fa4d56a",
+      "90d477d5-f2a7-4883-9860-05370e8a7e80",
+      "996b436b-319f-4973-b5f1-19eddcc2a631",
+      "80b286d3-fedc-4e07-9a40-e98943808c44",
+      "7f3b8475-e9c8-457c-bfdb-75bcfb1f87be",
+      "d4fb782d-595f-40cc-bed8-570cebc15a1f",
+      "cae84d7c-e4be-4f47-b354-58a955864ae3",
+      "d1a0f43b-00be-4c90-8730-e2923c73f475",
+      "36f59156-1f85-44e4-884f-00b6739e281b",
+      "cb095a86-daf0-4e97-92ea-df25a18dafc2"
+    ],
+    "pipeline": {
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "adr"
+              ]
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "fitness-fn"
+              ],
+              "via": {
+                "direction": "in",
+                "relationType": "implements"
+              }
+            },
+            {
+              "types": [
+                "system",
+                "container",
+                "component"
+              ],
+              "via": {
+                "direction": "out",
+                "relationType": "constrains"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {}
+  },
+  {
+    "folder": "Shop/Decisions",
+    "id": "b85b24a9-ebcf-47d8-9976-cbbf62e8d591",
+    "kind": "table",
+    "name": "Fitness functions",
+    "nodeIds": [
+      "418761d0-e97a-4671-90d8-e146f31da486",
+      "cd378e8c-8803-4243-9f08-26340dabef81",
+      "18bff412-316e-4d5a-913b-e98827ba88c0",
+      "af6ef5a8-e222-492d-8427-2fb929b3a8ea",
+      "a76084a8-7513-4d57-b72d-183f5a52be8b",
+      "dbf9b1ec-94ee-4906-87a4-8a1d140d77bd",
+      "90d477d5-f2a7-4883-9860-05370e8a7e80"
+    ],
+    "pipeline": {
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "fitness-fn"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {}
+  },
+  {
+    "folder": "Landscape",
+    "id": "65c36e16-e3c5-4dd0-85c9-5db0dd08847e",
+    "name": "All systems",
+    "nodeIds": [
+      "d254177a-14c6-41df-8658-b5094e1828dd",
+      "c9564efd-da08-460c-ad95-d11f77748691",
+      "dbdeef79-5c6e-4d3d-aa42-69bc2ace15bd",
+      "2e6213dd-bca8-4d0f-881f-5d38fc0519ad",
+      "a42a5463-c328-42a0-83a2-bb47e406263a"
+    ],
+    "positions": {
+      "2e6213dd-bca8-4d0f-881f-5d38fc0519ad": {
+        "height": 170,
+        "width": 150,
+        "x": 105,
+        "y": 0
+      },
+      "a42a5463-c328-42a0-83a2-bb47e406263a": {
+        "height": 170,
+        "width": 150,
+        "x": 872,
+        "y": 0
+      },
+      "c9564efd-da08-460c-ad95-d11f77748691": {
+        "height": 410,
+        "width": 1000,
+        "x": 807,
+        "y": 501
+      },
+      "d254177a-14c6-41df-8658-b5094e1828dd": {
+        "height": 410,
+        "width": 1800,
+        "x": 331,
+        "y": 240
+      },
+      "dbdeef79-5c6e-4d3d-aa42-69bc2ace15bd": {
+        "height": 260,
+        "width": 360,
+        "x": 0,
+        "y": 461
+      }
+    }
+  },
+  {
+    "folder": "Landscape",
+    "id": "0ab4e0ab-874d-4b1d-83fc-f41d4a758fd0",
+    "name": "Systems and containers",
+    "nodeIds": [
+      "d254177a-14c6-41df-8658-b5094e1828dd",
+      "c9564efd-da08-460c-ad95-d11f77748691",
+      "dbdeef79-5c6e-4d3d-aa42-69bc2ace15bd",
+      "2e6213dd-bca8-4d0f-881f-5d38fc0519ad",
+      "a42a5463-c328-42a0-83a2-bb47e406263a",
+      "36f59156-1f85-44e4-884f-00b6739e281b",
+      "d1a0f43b-00be-4c90-8730-e2923c73f475",
+      "7f3b8475-e9c8-457c-bfdb-75bcfb1f87be",
+      "80b286d3-fedc-4e07-9a40-e98943808c44",
+      "e1c8d747-d232-49b4-bd1a-db42ac4ea455",
+      "a3739b2d-e64e-4363-b010-c9482f4d06c5",
+      "6ef298ce-4568-470b-898f-2e02d8aa0217"
+    ],
+    "positions": {
+      "2e6213dd-bca8-4d0f-881f-5d38fc0519ad": {
+        "height": 170,
+        "width": 150,
+        "x": 1053.59375,
+        "y": 0
+      },
+      "36f59156-1f85-44e4-884f-00b6739e281b": {
+        "height": 260,
+        "width": 255,
+        "x": 30,
+        "y": 120
+      },
+      "6ef298ce-4568-470b-898f-2e02d8aa0217": {
+        "height": 260,
+        "width": 240,
+        "x": 60,
+        "y": 120
+      },
+      "7f3b8475-e9c8-457c-bfdb-75bcfb1f87be": {
+        "height": 260,
+        "width": 240,
+        "x": 442.759765625,
+        "y": 120
+      },
+      "80b286d3-fedc-4e07-9a40-e98943808c44": {
+        "height": 200,
+        "width": 300,
+        "x": 412.759765625,
+        "y": 337.599609375
+      },
+      "a3739b2d-e64e-4363-b010-c9482f4d06c5": {
+        "height": 260,
+        "width": 240,
+        "x": 496,
+        "y": 120
+      },
+      "a42a5463-c328-42a0-83a2-bb47e406263a": {
+        "height": 170,
+        "width": 150,
+        "x": 1359.759765625,
+        "y": 0
+      },
+      "c9564efd-da08-460c-ad95-d11f77748691": {
+        "height": 567.599609375,
+        "width": 766,
+        "x": 1254.759765625,
+        "y": 240
+      },
+      "d1a0f43b-00be-4c90-8730-e2923c73f475": {
+        "height": 260,
+        "width": 255,
+        "x": 878.759765625,
+        "y": 120
+      },
+      "d254177a-14c6-41df-8658-b5094e1828dd": {
+        "height": 567.599609375,
+        "width": 1148.759765625,
+        "x": 0,
+        "y": 240
+      },
+      "dbdeef79-5c6e-4d3d-aa42-69bc2ace15bd": {
+        "height": 260,
+        "width": 360,
+        "x": 2198.4755859375,
+        "y": 240
+      },
+      "e1c8d747-d232-49b4-bd1a-db42ac4ea455": {
+        "height": 200,
+        "width": 300,
+        "x": 30,
+        "y": 337.599609375
+      }
+    }
+  },
+  {
+    "folder": "Landscape",
+    "id": "c661ebf9-8311-491e-a38a-c616519e6ece",
+    "kind": "table",
+    "name": "Decisions across systems",
+    "nodeIds": [],
+    "pipeline": {
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "adr"
+              ]
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "fitness-fn"
+              ],
+              "via": {
+                "direction": "in",
+                "relationType": "implements"
+              }
+            },
+            {
+              "types": [
+                "system",
+                "container",
+                "component"
+              ],
+              "via": {
+                "direction": "out",
+                "relationType": "constrains"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {}
+  },
+  {
+    "folder": "Warehouse/C4",
+    "id": "849af95c-775b-4fff-a2e0-8778405921e9",
+    "name": "System context",
+    "nodeIds": [
+      "c9564efd-da08-460c-ad95-d11f77748691",
+      "a42a5463-c328-42a0-83a2-bb47e406263a",
+      "dbdeef79-5c6e-4d3d-aa42-69bc2ace15bd",
+      "2e6213dd-bca8-4d0f-881f-5d38fc0519ad"
+    ],
+    "positions": {
+      "2e6213dd-bca8-4d0f-881f-5d38fc0519ad": {
+        "height": 170,
+        "width": 150,
+        "x": 0,
+        "y": 0
+      },
+      "a42a5463-c328-42a0-83a2-bb47e406263a": {
+        "height": 170,
+        "width": 150,
+        "x": 243.75,
+        "y": 0
+      },
+      "c9564efd-da08-460c-ad95-d11f77748691": {
+        "height": 410,
+        "width": 1000,
+        "x": 178.75,
+        "y": 274.375
+      },
+      "dbdeef79-5c6e-4d3d-aa42-69bc2ace15bd": {
+        "height": 260,
+        "width": 360,
+        "x": 138.75,
+        "y": 513.75
+      }
+    }
+  },
+  {
+    "folder": "Warehouse/C4",
+    "id": "ac967e0a-6eb2-4165-9881-c54b2e2e4020",
+    "name": "Warehouse containers",
+    "nodeIds": [
+      "c9564efd-da08-460c-ad95-d11f77748691",
+      "6ef298ce-4568-470b-898f-2e02d8aa0217",
+      "a3739b2d-e64e-4363-b010-c9482f4d06c5",
+      "e1c8d747-d232-49b4-bd1a-db42ac4ea455",
+      "a42a5463-c328-42a0-83a2-bb47e406263a",
+      "dbdeef79-5c6e-4d3d-aa42-69bc2ace15bd"
+    ],
+    "positions": {
+      "6ef298ce-4568-470b-898f-2e02d8aa0217": {
+        "height": 260,
+        "width": 240,
+        "x": 60,
+        "y": 120
+      },
+      "a3739b2d-e64e-4363-b010-c9482f4d06c5": {
+        "height": 260,
+        "width": 240,
+        "x": 496,
+        "y": 357.599609375
+      },
+      "a42a5463-c328-42a0-83a2-bb47e406263a": {
+        "height": 170,
+        "width": 150,
+        "x": 105,
+        "y": 0
+      },
+      "c9564efd-da08-460c-ad95-d11f77748691": {
+        "height": 567.599609375,
+        "width": 766,
+        "x": 0,
+        "y": 240
+      },
+      "dbdeef79-5c6e-4d3d-aa42-69bc2ace15bd": {
+        "height": 260,
+        "width": 360,
+        "x": 943.7158203125,
+        "y": 393.7998046875
+      },
+      "e1c8d747-d232-49b4-bd1a-db42ac4ea455": {
+        "height": 200,
+        "width": 300,
+        "x": 30,
+        "y": 337.599609375
+      }
+    }
+  },
+  {
+    "folder": "Warehouse/C4",
+    "id": "27d4f84d-78d2-453e-9024-a43d6d47a439",
+    "name": "Warehouse components",
+    "nodeIds": [
+      "6ef298ce-4568-470b-898f-2e02d8aa0217",
+      "a3739b2d-e64e-4363-b010-c9482f4d06c5",
+      "f118a2e0-f802-4d11-b620-6708aee7de91",
+      "43e15411-fea4-497a-9442-85d6ac891a59"
+    ],
+    "positions": {
+      "43e15411-fea4-497a-9442-85d6ac891a59": {
+        "height": 120,
+        "width": 200,
+        "x": 20,
+        "y": 120
+      },
+      "6ef298ce-4568-470b-898f-2e02d8aa0217": {
+        "height": 260,
+        "width": 240,
+        "x": 0,
+        "y": 0
+      },
+      "a3739b2d-e64e-4363-b010-c9482f4d06c5": {
+        "height": 260,
+        "width": 240,
+        "x": 436,
+        "y": 0
+      },
+      "c9564efd-da08-460c-ad95-d11f77748691": {
+        "height": 290,
+        "width": 706,
+        "x": 0,
+        "y": 0
+      },
+      "f118a2e0-f802-4d11-b620-6708aee7de91": {
+        "height": 120,
+        "width": 200,
+        "x": 20,
+        "y": 120
+      }
+    }
+  },
+  {
+    "folder": "Warehouse/Domain",
+    "id": "44c148c3-c397-4fc6-8742-fae157ccff5d",
+    "name": "Domain model",
+    "nodeIds": [
+      "f6d81740-86c2-4018-a915-8f63c9088103",
+      "774dd046-eae3-4f95-a955-b24eda0b4e58",
+      "2ca3ac44-bc78-450c-95ca-671f2c182749",
+      "f2a1d85c-de79-4111-952f-0be35819ae07",
+      "52a0f4d0-2339-474c-bedb-991dd335d2f2",
+      "bb5c0eb6-f793-4ea2-be35-35d4d840dd0f"
+    ],
+    "positions": {
+      "2ca3ac44-bc78-450c-95ca-671f2c182749": {
+        "height": 56,
+        "width": 170,
+        "x": 30,
+        "y": 120
+      },
+      "52a0f4d0-2339-474c-bedb-991dd335d2f2": {
+        "height": 56,
+        "width": 170,
+        "x": 248.25,
+        "y": 120
+      },
+      "774dd046-eae3-4f95-a955-b24eda0b4e58": {
+        "height": 220,
+        "width": 360,
+        "x": 735.53125,
+        "y": 0
+      },
+      "bb5c0eb6-f793-4ea2-be35-35d4d840dd0f": {
+        "height": 56,
+        "width": 170,
+        "x": 30,
+        "y": 120
+      },
+      "f2a1d85c-de79-4111-952f-0be35819ae07": {
+        "height": 56,
+        "width": 170,
+        "x": 466.5,
+        "y": 120
+      },
+      "f6d81740-86c2-4018-a915-8f63c9088103": {
+        "height": 220,
+        "width": 666.5,
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  {
+    "folder": "Warehouse/States",
+    "id": "641e57c2-126a-4eac-a7af-5886a6ac4a23",
+    "name": "Reservation lifecycle",
+    "nodeIds": [
+      "825174f9-dc76-4e41-843a-f26bb74e0b0b",
+      "b4fe51f9-06b6-41eb-9a98-b54a53df0b4b",
+      "9e0417e8-cea8-4823-b9df-8bf7ebd1fb84",
+      "a44ca42f-5b06-4b28-a994-bd409acd1d84",
+      "23a8ca79-46f4-4524-aa28-df283f2ee85c",
+      "f2a1d85c-de79-4111-952f-0be35819ae07",
+      "88a1cee2-2c8d-433a-94fd-39e6f1c25b13",
+      "6cfc645c-346d-457b-8ab1-bd7ceb9a2aac",
+      "6ff68be8-d305-40dd-bd3d-e9f970e23107",
+      "92926fa5-6b2a-480c-ab7b-abdec71527fe"
+    ],
+    "positions": {
+      "23a8ca79-46f4-4524-aa28-df283f2ee85c": {
+        "height": 220,
+        "width": 320,
+        "x": 220,
+        "y": 474.1787109375
+      },
+      "6cfc645c-346d-457b-8ab1-bd7ceb9a2aac": {
+        "height": 36,
+        "width": 36,
+        "x": 362,
+        "y": 128
+      },
+      "6ff68be8-d305-40dd-bd3d-e9f970e23107": {
+        "height": 52,
+        "width": 170,
+        "x": 30,
+        "y": 293.08984375
+      },
+      "825174f9-dc76-4e41-843a-f26bb74e0b0b": {
+        "height": 52,
+        "width": 170,
+        "x": 30,
+        "y": 120
+      },
+      "88a1cee2-2c8d-433a-94fd-39e6f1c25b13": {
+        "height": 724.1787109375,
+        "width": 926,
+        "x": 252.1787109375,
+        "y": 0
+      },
+      "92926fa5-6b2a-480c-ab7b-abdec71527fe": {
+        "height": 220,
+        "width": 320,
+        "x": 576,
+        "y": 474.1787109375
+      },
+      "9e0417e8-cea8-4823-b9df-8bf7ebd1fb84": {
+        "height": 220,
+        "width": 320,
+        "x": 220,
+        "y": 209.08984375
+      },
+      "a44ca42f-5b06-4b28-a994-bd409acd1d84": {
+        "height": 52,
+        "width": 170,
+        "x": 30,
+        "y": 206.544921875
+      },
+      "b4fe51f9-06b6-41eb-9a98-b54a53df0b4b": {
+        "height": 220,
+        "width": 320,
+        "x": 576,
+        "y": 209.08984375
+      },
+      "f2a1d85c-de79-4111-952f-0be35819ae07": {
+        "height": 56,
+        "width": 170,
+        "x": 0,
+        "y": 0
+      },
+      "f6d81740-86c2-4018-a915-8f63c9088103": {
+        "height": 220,
+        "width": 360,
+        "x": 0,
+        "y": 334.0888671875
+      }
+    }
+  },
+  {
+    "folder": "Warehouse/Requirements",
+    "id": "4cf1a28a-700c-4b97-bfad-b41ac562660e",
+    "kind": "table",
+    "name": "Traceability",
+    "nodeIds": [
+      "4cf8e71e-83ce-4f1c-af42-66152da94942",
+      "47b8b5a3-086a-49ab-b275-fb4fd20d6642",
+      "682be3e1-92cf-4b15-abc6-36880de5d729",
+      "f9ec4eeb-dab1-4e6b-b932-724267247bd9",
+      "8f5904e5-8871-4cea-965d-d88ed68ea6ef",
+      "cfe39ca5-e5dd-420e-904b-7c8d38a136cc",
+      "cc0024d1-1b47-4deb-a9b4-1aa24734b508",
+      "9edf74bc-d0d2-4016-9e76-a6dca5f3b041",
+      "16517c9d-13e8-4927-a4c1-f14c77860588",
+      "8b1f2f97-d3cc-4f65-9ed7-92f78097815d",
+      "3165bcd1-fc89-4e7a-a21d-55f37aaba998",
+      "539c9857-3d81-4296-bcde-cfc748be2f2a",
+      "6113cf28-c911-43f7-8ef6-c4b67a43149f",
+      "5a5c2996-6b13-42ee-9f2a-f18102f79952",
+      "4e5856e4-cb5c-48d0-bad2-899e16a810ab",
+      "f808a6b8-145d-4759-99d4-af799bf94178",
+      "188000c1-8a1e-485d-87a7-9fe26ada41a1",
+      "9c55f757-6989-436c-bd48-f984a7efdcbc",
+      "a9f84c1e-1616-449b-96c3-c881b7fd838a",
+      "72a67d93-676f-44ab-8263-3bcbaa0df878",
+      "da8819ba-1fd4-498c-a740-ef8c68030ddc",
+      "afd0294b-56f5-4e50-be69-e2418407e7c5",
+      "67bfba73-d7d7-49ed-b669-8662d61365ec",
+      "1dfb35ca-570a-4543-8fc1-1fa38c09f6df",
+      "6eccca0f-8df7-4773-b21d-fa924d0ab559",
+      "92bf5f01-5181-4054-9dbe-1719122aed88",
+      "0f72a6a7-ef15-4e9a-829d-66783a0789df",
+      "4b02588d-fc02-479c-966f-2a94142b1d2d",
+      "f879d6e1-8cba-42bb-9d18-32e4d8d2da80",
+      "d1d673a7-7b0e-4d39-8329-7b5d8ca649e9",
+      "4410806a-56ef-42c4-b4a5-365989aeb4a6",
+      "0c29977a-3c8b-42bb-b663-6cce82f4a58c",
+      "017b2e7d-d32f-4ab2-848c-9e8472557f9b",
+      "414f0388-9620-416f-93d6-2f5abadd1893",
+      "7f3a9678-5604-4be3-8a68-183cde7c86b6",
+      "da86bea3-f60d-486f-8d52-925f02ccaff5",
+      "9bd4d36c-9692-4fd7-89fb-f1c02676c3dd",
+      "0ea83bb4-6c37-471b-a369-ca6abf5ab1b5",
+      "f673aaf6-d550-484e-b24a-e60783332f63",
+      "bfe601e0-c9b0-4cfd-ad69-6d1a81b7750c",
+      "4a836ce8-5184-4b68-8b18-88e0c4b2ee47",
+      "9b5ede9f-eca0-4171-b5b7-e3ca3899e524",
+      "ea465e58-9ca0-468c-a087-17c1a063dacc",
+      "16dc31e4-71db-46ee-8c25-5c11ff2ebc7e",
+      "53b26261-597a-44ee-902c-709d87150a66",
+      "401e5451-2f6e-47c8-827a-d994282b38da",
+      "c54bcaf3-319e-41d1-8fb6-39240094318c",
+      "8b162626-cd92-4fa0-9264-2aaaa800c981",
+      "3125af3d-40a8-4031-b5a3-a46fdb760037",
+      "d7015b0f-265b-4b18-a010-f6f2b81eef29",
+      "d6d4e1ea-7a9a-4f50-b094-e323721a2cad",
+      "23a482b9-4da0-4724-8946-70a186171554",
+      "51a75223-9b26-4d60-b873-65250527c5fb",
+      "10ebcf12-8169-43e6-b912-8d1bf290c431",
+      "611d25da-bd80-4c14-878f-ef632acf83c9",
+      "7796dd1a-f393-4b6f-97ad-718b7de46d18",
+      "279ea47e-fd71-4585-8c82-863bdea7c436",
+      "f5d4294d-c011-4e2b-8780-0cfa61a5113b",
+      "8c582a41-99ed-40c8-9a6d-8506ac747ab0",
+      "2874b580-3fcc-4fe2-b3b7-836ad04844cc",
+      "a2f056d8-33d8-4d54-9291-f7f50a3aa81f",
+      "caef2e3e-c7be-4289-996e-6a9f18555b4a",
+      "c5fa21cf-75f8-485c-94f8-2fe317d059f9",
+      "eff4e42c-84cf-4ef1-aa4b-7250ace8dc64",
+      "1b9d1e15-291d-4b31-9f41-c3b9b52fdeeb",
+      "42f674c7-fe87-4213-9d3f-9b2104562112",
+      "77269ff9-9c28-457b-b53c-a2e4fe08d335",
+      "2b967c60-1e72-41fd-af35-282a22b990a3",
+      "008f5df0-a1c6-4e6b-a2db-3109f84db60a",
+      "b653be94-49d8-4ba2-9385-e10c5d5afc60"
+    ],
+    "pipeline": {
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "need"
+              ]
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "requirement"
+              ],
+              "via": {
+                "direction": "in",
+                "relationType": "derives"
+              }
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "scenario"
+              ],
+              "via": {
+                "direction": "in",
+                "relationType": "verifies"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {}
+  },
+  {
+    "folder": "Warehouse/Requirements",
+    "id": "cbee2894-d999-4eb8-8f92-33f333f1af32",
+    "kind": "table",
+    "name": "Requirement coverage",
+    "nodeIds": [
+      "4cf8e71e-83ce-4f1c-af42-66152da94942",
+      "47b8b5a3-086a-49ab-b275-fb4fd20d6642",
+      "f9ec4eeb-dab1-4e6b-b932-724267247bd9",
+      "8f5904e5-8871-4cea-965d-d88ed68ea6ef",
+      "cfe39ca5-e5dd-420e-904b-7c8d38a136cc",
+      "cc0024d1-1b47-4deb-a9b4-1aa24734b508",
+      "9edf74bc-d0d2-4016-9e76-a6dca5f3b041",
+      "16517c9d-13e8-4927-a4c1-f14c77860588",
+      "8b1f2f97-d3cc-4f65-9ed7-92f78097815d",
+      "3165bcd1-fc89-4e7a-a21d-55f37aaba998",
+      "539c9857-3d81-4296-bcde-cfc748be2f2a",
+      "6113cf28-c911-43f7-8ef6-c4b67a43149f",
+      "5a5c2996-6b13-42ee-9f2a-f18102f79952",
+      "4e5856e4-cb5c-48d0-bad2-899e16a810ab",
+      "f808a6b8-145d-4759-99d4-af799bf94178",
+      "188000c1-8a1e-485d-87a7-9fe26ada41a1",
+      "9c55f757-6989-436c-bd48-f984a7efdcbc",
+      "a9f84c1e-1616-449b-96c3-c881b7fd838a",
+      "72a67d93-676f-44ab-8263-3bcbaa0df878",
+      "da8819ba-1fd4-498c-a740-ef8c68030ddc",
+      "afd0294b-56f5-4e50-be69-e2418407e7c5",
+      "67bfba73-d7d7-49ed-b669-8662d61365ec",
+      "1dfb35ca-570a-4543-8fc1-1fa38c09f6df",
+      "92bf5f01-5181-4054-9dbe-1719122aed88",
+      "4b02588d-fc02-479c-966f-2a94142b1d2d",
+      "f879d6e1-8cba-42bb-9d18-32e4d8d2da80",
+      "d1d673a7-7b0e-4d39-8329-7b5d8ca649e9",
+      "0c29977a-3c8b-42bb-b663-6cce82f4a58c",
+      "017b2e7d-d32f-4ab2-848c-9e8472557f9b",
+      "414f0388-9620-416f-93d6-2f5abadd1893",
+      "7f3a9678-5604-4be3-8a68-183cde7c86b6",
+      "da86bea3-f60d-486f-8d52-925f02ccaff5",
+      "9bd4d36c-9692-4fd7-89fb-f1c02676c3dd",
+      "0ea83bb4-6c37-471b-a369-ca6abf5ab1b5",
+      "f673aaf6-d550-484e-b24a-e60783332f63",
+      "bfe601e0-c9b0-4cfd-ad69-6d1a81b7750c",
+      "4a836ce8-5184-4b68-8b18-88e0c4b2ee47",
+      "9b5ede9f-eca0-4171-b5b7-e3ca3899e524",
+      "16dc31e4-71db-46ee-8c25-5c11ff2ebc7e",
+      "53b26261-597a-44ee-902c-709d87150a66",
+      "401e5451-2f6e-47c8-827a-d994282b38da",
+      "c54bcaf3-319e-41d1-8fb6-39240094318c",
+      "8b162626-cd92-4fa0-9264-2aaaa800c981",
+      "3125af3d-40a8-4031-b5a3-a46fdb760037",
+      "d7015b0f-265b-4b18-a010-f6f2b81eef29",
+      "d6d4e1ea-7a9a-4f50-b094-e323721a2cad",
+      "23a482b9-4da0-4724-8946-70a186171554",
+      "51a75223-9b26-4d60-b873-65250527c5fb",
+      "611d25da-bd80-4c14-878f-ef632acf83c9",
+      "7796dd1a-f393-4b6f-97ad-718b7de46d18",
+      "279ea47e-fd71-4585-8c82-863bdea7c436",
+      "f5d4294d-c011-4e2b-8780-0cfa61a5113b",
+      "8c582a41-99ed-40c8-9a6d-8506ac747ab0",
+      "2874b580-3fcc-4fe2-b3b7-836ad04844cc",
+      "a2f056d8-33d8-4d54-9291-f7f50a3aa81f",
+      "caef2e3e-c7be-4289-996e-6a9f18555b4a",
+      "c5fa21cf-75f8-485c-94f8-2fe317d059f9",
+      "eff4e42c-84cf-4ef1-aa4b-7250ace8dc64",
+      "42f674c7-fe87-4213-9d3f-9b2104562112",
+      "77269ff9-9c28-457b-b53c-a2e4fe08d335",
+      "008f5df0-a1c6-4e6b-a2db-3109f84db60a",
+      "b653be94-49d8-4ba2-9385-e10c5d5afc60"
+    ],
+    "pipeline": {
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "requirement"
+              ]
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "scenario"
+              ],
+              "via": {
+                "direction": "in",
+                "relationType": "verifies"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {}
+  },
+  {
+    "folder": "Warehouse/Decisions",
+    "id": "d15823c9-00a4-4e20-bd41-cb5b13be54c7",
+    "kind": "table",
+    "name": "Decisions",
+    "nodeIds": [],
+    "pipeline": {
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "adr"
+              ]
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "fitness-fn"
+              ],
+              "via": {
+                "direction": "in",
+                "relationType": "implements"
+              }
+            },
+            {
+              "types": [
+                "system",
+                "container",
+                "component"
+              ],
+              "via": {
+                "direction": "out",
+                "relationType": "constrains"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {}
+  },
+  {
+    "folder": "Warehouse/Decisions",
+    "id": "67b440ef-3b24-45af-b838-b12da536bcb2",
+    "kind": "table",
+    "name": "Fitness functions",
+    "nodeIds": [],
+    "pipeline": {
+      "levels": [
+        {
+          "ways": [
+            {
+              "types": [
+                "fitness-fn"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {}
+  },
+  {
+    "expandedNodeIds": [
+      "88a1cee2-2c8d-433a-94fd-39e6f1c25b13"
+    ],
+    "folder": "Shop/States",
+    "id": "ecb3bab5-7702-437e-8d43-e35f2281ef2d",
+    "kind": "static",
+    "name": "Reservation lifecycle",
+    "nodeIds": [],
+    "partOf": "eead9329-4a63-47bc-8778-0cb28742d1a3",
+    "pipeline": {
+      "edges": "all",
+      "levels": [
+        {
+          "filters": [
+            {
+              "kind": "within",
+              "nodeId": "88a1cee2-2c8d-433a-94fd-39e6f1c25b13",
+              "self": true
+            }
+          ],
+          "ways": [
+            {
+              "types": [
+                "state-machine",
+                "state",
+                "pseudostate",
+                "event"
+              ]
+            }
+          ]
+        },
+        {
+          "ways": [
+            {
+              "types": [
+                "entity"
+              ],
+              "via": {
+                "direction": "out",
+                "relationType": "lifecycle-of"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "positions": {
+      "23a8ca79-46f4-4524-aa28-df283f2ee85c": {
+        "height": 220,
+        "width": 320,
+        "x": 220,
+        "y": 468.3896484375
+      },
+      "6cfc645c-346d-457b-8ab1-bd7ceb9a2aac": {
+        "height": 36,
+        "width": 36,
+        "x": 362,
+        "y": 128
+      },
+      "6ff68be8-d305-40dd-bd3d-e9f970e23107": {
+        "height": 52,
+        "width": 170,
+        "x": 30,
+        "y": 296.3896484375
+      },
+      "825174f9-dc76-4e41-843a-f26bb74e0b0b": {
+        "height": 52,
+        "width": 170,
+        "x": 30,
+        "y": 120
+      },
+      "88a1cee2-2c8d-433a-94fd-39e6f1c25b13": {
+        "height": 718.3896484375,
+        "width": 953.388671875,
+        "x": 253.388671875,
+        "y": 0
+      },
+      "92926fa5-6b2a-480c-ab7b-abdec71527fe": {
+        "height": 220,
+        "width": 320,
+        "x": 603.388671875,
+        "y": 468.3896484375
+      },
+      "9e0417e8-cea8-4823-b9df-8bf7ebd1fb84": {
+        "height": 220,
+        "width": 320,
+        "x": 220,
+        "y": 212.3896484375
+      },
+      "a44ca42f-5b06-4b28-a994-bd409acd1d84": {
+        "height": 52,
+        "width": 170,
+        "x": 30,
+        "y": 208.1953125
+      },
+      "b4fe51f9-06b6-41eb-9a98-b54a53df0b4b": {
+        "height": 220,
+        "width": 320,
+        "x": 603.388671875,
+        "y": 212.3896484375
+      },
+      "f2a1d85c-de79-4111-952f-0be35819ae07": {
+        "height": 56,
+        "width": 170,
+        "x": 0,
+        "y": 0
+      },
+      "f6d81740-86c2-4018-a915-8f63c9088103": {
+        "height": 220,
+        "width": 360,
+        "x": 0,
+        "y": 331.1943359375
+      }
+    },
+    "subject": "88a1cee2-2c8d-433a-94fd-39e6f1c25b13",
+    "viewpoint": "state-machine"
+  }
+]

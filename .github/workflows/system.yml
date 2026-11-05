@@ -1,0 +1,38 @@
+name: System
+
+# The loop of the whole system (pipeline/system.mjs): on a change of the model, when a repository
+# reaches a new commit of it, and every day.
+
+on:
+  push:
+    branches: [main]
+    paths: ['.radical/model/**']
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: system
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  system:
+    name: Bring the repositories to the model
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: The standards, and the system's repositories
+        run: node tools/standards.mjs
+      - uses: ./.standards/.github/actions/setup
+      - name: Who has what left, and who goes now
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AGENT_TOKEN: ${{ secrets.AGENT_TOKEN }}
+        run: node pipeline/system.mjs

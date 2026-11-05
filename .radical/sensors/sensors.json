@@ -1,0 +1,28 @@
+{
+  "sensors": {
+    "warehouse-contract": {
+      "command": "node -e \"console.error(\\\"Measured in the repository that builds the element.\\\");process.exit(2)\""
+    },
+    "oversell": {
+      "command": "node -e \"console.error(\\\"Measured in the repository that builds the element.\\\");process.exit(2)\""
+    },
+    "smoke": {
+      "command": "node -e \"console.error(\\\"Measured in the repository that builds the element.\\\");process.exit(2)\""
+    },
+    "quote-speed": {
+      "command": "node -e \"console.error(\\\"Measured in the repository that builds the element.\\\");process.exit(2)\""
+    },
+    "boundaries": {
+      "command": "node -e \"console.error(\\\"Measured in the repository that builds the element.\\\");process.exit(2)\""
+    },
+    "openapi": {
+      "command": "node -e \"console.error(\\\"Measured in the repository that builds the element.\\\");process.exit(2)\""
+    },
+    "idempotency": {
+      "command": "node -e \"console.error(\\\"Measured in the repository that builds the element.\\\");process.exit(2)\""
+    },
+    "fuzz": {
+      "command": "node -e \"console.error(\\\"Measured in the repository that builds the element.\\\");process.exit(2)\""
+    }
+  }
+}

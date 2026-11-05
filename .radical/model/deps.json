@@ -1,0 +1,11 @@
+{
+  "name": "system",
+  "dependencies": [
+    {
+      "name": "standards",
+      "repo": "https://github.com/radicaltools/radical.tools.sdlc.demo.2.standards.git",
+      "path": ".radical/model",
+      "ref": "v2.3.0"
+    }
+  ]
+}

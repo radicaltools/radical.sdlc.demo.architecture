@@ -1,0 +1,10 @@
+name: Change to the shop
+description: What the shop should do. Give it the label agent:implement to have the agents propose it.
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What should the shop do, and why?
+      placeholder: Orders from 100 ship free; below that shipping costs 9.99.
+    validations:
+      required: true

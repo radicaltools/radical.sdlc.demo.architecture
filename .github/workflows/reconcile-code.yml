@@ -1,0 +1,92 @@
+name: Bring the code to the model
+
+# A reusable workflow. A repository of the system calls it from a file of a few lines, and it runs on
+# that repository's checkout. Its coding agent reads the whole model, with its history, in
+# .radical/model; the gate judges its part, in .agent/part. Nothing here merges: the merge moves
+# .radical/reconciled.json, the repository says so to this one's system.yml, and that looks again.
+#
+# The agent step holds only the Claude credential. The steps after it run no AI: they commit under
+# the agent's name and push with AGENT_TOKEN, because a push made with GITHUB_TOKEN would start no gate.
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  reconcile:
+    name: Bring the code to the model
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: The whole model, as main has it
+        run: node tools/model.mjs --whole
+      - name: The standards, at the version the model pins
+        run: node tools/standards.mjs
+      - uses: ./.standards/.github/actions/setup
+        with:
+          claude: 'true'
+      - name: Look at the gap
+        id: look
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node .agent/system/pipeline/reconcile-code.mjs next
+      - name: On its branch
+        if: steps.look.outputs.step == 'work'
+        env:
+          BRANCH: ${{ steps.look.outputs.branch }}
+        run: git checkout -B "$BRANCH"
+      - name: What the other repositories have now
+        if: steps.look.outputs.step == 'work'
+        run: node .agent/system/pipeline/reconcile-code.mjs neighbours
+      - name: The agent checks its work as the gate will
+        if: steps.look.outputs.step == 'work'
+        run: sed -i 's#radical sense run --trigger#radical sense run --folder .agent/part --trigger#; s#radical check .radical/model#radical check .agent/part#' .claude/skills/coding-agent/SKILL.md
+      - name: Coding agent
+        id: agent
+        if: steps.look.outputs.step == 'work'
+        continue-on-error: true
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AGENT_MODEL: ${{ vars.AGENT_MODEL }}
+          BASE: ${{ steps.look.outputs.base }}
+        run: node .standards/pipeline/tools/run-agent.mjs coding-agent mode=implement "base=$BASE"
+      - name: What became of it
+        id: outcome
+        if: steps.look.outputs.step == 'work'
+        env:
+          AGENT: ${{ steps.agent.outcome }}
+        run: node .standards/pipeline/tools/reconcile.mjs outcome .agent/report.md "$AGENT"
+      - name: Commit the code
+        if: steps.outcome.outputs.act == 'pull'
+        run: .standards/pipeline/tools/commit-as.sh coding-agent "Implement the model"
+      - name: Say which model the code has reached
+        if: steps.outcome.outputs.act == 'pull'
+        env:
+          DESIRED: ${{ steps.look.outputs.desired }}
+        run: |
+          node .standards/pipeline/tools/reconcile.mjs mark "$DESIRED"
+          .standards/pipeline/tools/commit-as.sh pipeline "The code reaches the model at ${DESIRED:0:7}"
+      - name: Push and open the pull request
+        if: steps.outcome.outputs.act == 'pull'
+        env:
+          GH_TOKEN: ${{ secrets.AGENT_TOKEN }}
+          BRANCH: ${{ steps.look.outputs.branch }}
+          DESIRED: ${{ steps.look.outputs.desired }}
+        run: |
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$BRANCH"
+          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --title "Implement the model at ${DESIRED:0:7}" --body-file .agent/report.md
+      - name: A person reads why not
+        if: steps.outcome.outputs.act == 'ask'
+        env:
+          GH_TOKEN: ${{ secrets.AGENT_TOKEN }}
+          DESIRED: ${{ steps.look.outputs.desired }}
+        run: node .standards/pipeline/tools/reconcile.mjs stuck "$DESIRED" .agent/report.md
