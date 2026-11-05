@@ -1143,7 +1143,10 @@
       "77269ff9-9c28-457b-b53c-a2e4fe08d335",
       "2b967c60-1e72-41fd-af35-282a22b990a3",
       "008f5df0-a1c6-4e6b-a2db-3109f84db60a",
-      "b653be94-49d8-4ba2-9385-e10c5d5afc60"
+      "b653be94-49d8-4ba2-9385-e10c5d5afc60",
+      "a29f7615-19ea-49f9-89f8-41abd88b5140",
+      "3fac19bc-7538-443d-9abe-f2a44bfdcfb1",
+      "007ba067-d6e2-425f-b50d-1806f5527930"
     ],
     "pipeline": {
       "levels": [
@@ -1253,7 +1256,9 @@
       "42f674c7-fe87-4213-9d3f-9b2104562112",
       "77269ff9-9c28-457b-b53c-a2e4fe08d335",
       "008f5df0-a1c6-4e6b-a2db-3109f84db60a",
-      "b653be94-49d8-4ba2-9385-e10c5d5afc60"
+      "b653be94-49d8-4ba2-9385-e10c5d5afc60",
+      "3fac19bc-7538-443d-9abe-f2a44bfdcfb1",
+      "007ba067-d6e2-425f-b50d-1806f5527930"
     ],
     "pipeline": {
       "levels": [
