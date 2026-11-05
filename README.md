@@ -56,6 +56,7 @@ pipeline/part.mjs        one repository's part of the model
 pipeline/system.mjs      the loop: who has what left, who goes now
 pipeline/reconcile-code.mjs, .github/workflows/reconcile-code.yml   a repository's side of it
 pipeline/model-agent-whole-system.md   replaces what the standards' model agent says about other systems
+pipeline/crosses.mjs     the test of the two systems together
 docs/sdlc.svg            the diagram above
 ```
 
@@ -72,16 +73,23 @@ A repository's part is what it maps in `implements`, all under it, the requireme
 entities those elements answer for, their scenarios, the ADRs that constrain them and the fitness functions
 of those ADRs.
 
+## The two together
+
+Each side's own tests use a stand-in for the other, so they cannot see a field named differently on each side.
+The sensor `crosses` can: in the Gate of a pull request it runs that repository's code and the other's `main`, with
+only the carrier standing in, and sends an order through every call the Shop makes to the Warehouse. It checks that
+what the Warehouse answers comes out of the Shop. It takes seconds and no AI.
+
+So a Warehouse pull request that breaks the Shop on `main` is red in its own Gate, and a rename goes in steps: add
+the new name, move the Shop, then remove the old one.
+
 ## Not here yet
 
-- **A test of the two together.** Each side has its own tests, and the Shop's sensor `warehouse-contract` checks
-  the path of a call and its key, not the fields of the answer. A field named differently on each side would
-  pass every Gate.
 - **Deployment, nightly runs, updates of pins and the testing agent.** This demo goes from a ticket to
   merged code.
 - **Versions across repositories.** The Warehouse is not pinned in the Shop: the model orders the work, and
-  the Shop's sensor `warehouse-contract` reads the Warehouse's OpenAPI descriptions on its `main`. So
-  running a Shop Gate again can give another answer once the Warehouse has changed.
+  the sensors `warehouse-contract` and `crosses` read the other side's `main`. So running a Gate again can
+  give another answer once the other side has changed.
 - **Support in the product.** The part is worked out by `pipeline/part.mjs`, which reads the model's files
   directly, and Radical Studio and the MCP tools know nothing of it. Two things are also changed on
   the fly: the model agent's skill in `tools/standards.mjs`, and the commands the coding agent checks
