@@ -21,7 +21,7 @@ import { appendFileSync, mkdtempSync, readFileSync, writeFileSync } from 'node:f
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { branchOf, checksOf, LABELS, nextIn } from './change.mjs'
+import { branchOf, checksOf, LABELS, nextIn, sectionOf } from './change.mjs'
 import { gapSince, mappedBy, partOf, readNodes, readRelations } from './part.mjs'
 
 const MODEL = '.radical/model'
@@ -49,15 +49,6 @@ export const startMark = (name, desired) => `<!-- started ${name} ${desired} -->
 export const triedIn = (comments, name, desired) => comments.some((c) => c.body?.startsWith(startMark(name, desired)))
 /** The mark of the gates run again once every repository has built a commit of the model. */
 export const rerunMark = (desired) => `<!-- gates again ${desired} -->`
-
-/** What a pull request's text says under `## <heading>`. */
-export function sectionOf(body, heading) {
-  const at = (body ?? '').search(new RegExp(`^## ${heading}\\s*$`, 'm'))
-  if (at < 0) return ''
-  const rest = body.slice(at).split('\n').slice(1).join('\n')
-  const end = rest.search(/^## /m)
-  return (end < 0 ? rest : rest.slice(0, end)).trim()
-}
 
 /** The cost lines the agents' runs left in the texts of a change's pull requests. */
 export const costsIn = (texts) => texts.flatMap((t) => (t ?? '').split('\n').filter((l) => /^- [\w-]+: .*\$\d+\.\d{3}/.test(l)).map((l) => l.slice(2)))

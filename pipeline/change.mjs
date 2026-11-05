@@ -11,6 +11,7 @@
 //                                                  (kind stuck), from TEXT; prints the rounds of questions so far
 //   node pipeline/change.mjs accept <n>            merges every pull request of the change: the model first
 //   node pipeline/change.mjs next                  starts the oldest change in the queue
+//   node pipeline/change.mjs runs <earlier> <next>   keeps the agent runs of a pull request's earlier text in the next
 //
 // GH_TOKEN speaks here as the workflow; AGENT_TOKEN merges and reads the other repositories.
 import { execFileSync, spawnSync } from 'node:child_process'
@@ -54,6 +55,27 @@ the model, or say in your report why it is not one.
 ${problems.map((p) => `- ${p}`).join('\n')}
 `
 
+/** What a pull request's text says under `## <heading>`. */
+export function sectionOf(body, heading) {
+  const at = (body ?? '').search(new RegExp(`^## ${heading}\\s*$`, 'm'))
+  if (at < 0) return ''
+  const rest = body.slice(at).split('\n').slice(1).join('\n')
+  const end = rest.search(/^## /m)
+  return (end < 0 ? rest : rest.slice(0, end)).trim()
+}
+
+/** A pull request's new text, with the agent runs of its earlier texts kept before this run's: each update
+ *  replaces the text, and the cost of the change is all of them. */
+export function withEarlierRuns(earlier, next) {
+  const runs = sectionOf(earlier, 'Agent runs').split('\n').filter((l) => l.startsWith('- '))
+  if (!runs.length) return next
+  const at = next.search(/^## Agent runs\s*$/m)
+  if (at < 0) return `${next.trimEnd()}\n\n## Agent runs\n\n${runs.join('\n')}\n`
+  const head = next.slice(0, at)
+  const rest = next.slice(at).split('\n').slice(1).join('\n')
+  return `${head}## Agent runs\n\n${runs.join('\n')}\n${rest.replace(/^\n+/, '')}`
+}
+
 /** Whether every check of a pull request has passed; null while one still runs. */
 export function checksOf(rollup) {
   const done = rollup.every((c) => (c.status ?? 'COMPLETED') === 'COMPLETED' && (c.state ?? 'X') !== 'PENDING')
@@ -74,7 +96,9 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const repositories = () => JSON.parse(readFileSync('.radical/system.json', 'utf8')).repositories
     .map(({ name, repo: url }) => ({ name, slug: url.match(/github\.com\/(.+?)(\.git)?$/)[1] }))
 
-  if (command === 'start') {
+  if (command === 'runs') {
+    writeFileSync(rest[0], withEarlierRuns(readFileSync(n, 'utf8'), readFileSync(rest[0], 'utf8')))
+  } else if (command === 'start') {
     const open = labelled(LABELS.active).map((t) => String(t.number))
     const active = open.filter((t) => t !== n)
     // The loop starts the queue's next on each of its runs; a person who labels a ticket again means it.
@@ -116,7 +140,9 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
         { encoding: 'utf8', maxBuffer: 64 << 20, stdio: ['ignore', 'pipe', 'inherit'] })
       process.stdout.write(out.stdout ?? '')
       costs.push(...(out.stdout ?? '').split('\n').filter((l) => /^model-agent: .*\$\d/.test(l)))
-      spawnSync('node', ['pipeline/said.mjs', 'model-agent', '.agent/model-said.json'], { stdio: 'inherit' })
+      const asked = spawnSync('node', ['pipeline/said.mjs', 'model-agent', '.agent/model-said.json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] })
+      process.stdout.write(asked.stdout ?? '')
+      costs.push(...(asked.stdout ?? '').split('\n').filter((l) => /^model-agent-answer: \$\d/.test(l)))
       const answer = existsSync('.agent/model-said.json') ? JSON.parse(readFileSync('.agent/model-said.json', 'utf8')) : null
       return { result: modelOutcome({ failed: out.status !== 0, said: answer, changed: changed(), asked: process.env.WAY === 'question' }), said: answer }
     }
@@ -183,7 +209,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       console.log(next ? `Starts #${next}.` : 'The queue is empty.')
     }
   } else {
-    console.error('start, model, note, accept or next?')
+    console.error('start, model, note, accept, next or runs?')
     process.exit(2)
   }
 }

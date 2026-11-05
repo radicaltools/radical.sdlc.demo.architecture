@@ -80,7 +80,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AGENT_MODEL: ${{ vars.AGENT_MODEL }}
-        run: node .agent/system/pipeline/said.mjs coding-agent .agent/said.json
+        run: node .agent/system/pipeline/said.mjs coding-agent .agent/said.json | tee .agent/said.log
       - name: What becomes of it
         id: outcome
         if: steps.look.outputs.step == 'work'
@@ -113,12 +113,14 @@ jobs:
             cat .agent/report.md 2>/dev/null
             if [ -f .agent/said.json ]; then printf '\n\n## What the agent says\n\n'; node -e "const s=require('./.agent/said.json');console.log('**'+s.result+'**: '+s.why);for(const q of s.questions)console.log('- '+q)"; fi
             if [ -f .agent/proof.md ]; then printf '\n## Proof\n\n'; cat .agent/proof.md; fi
-            printf '\n## Agent runs\n\n'; grep -E '^coding-agent: .*\$[0-9]' .agent/agent.log | sed 's/^/- /'
+            printf '\n## Agent runs\n\n'; cat .agent/agent.log .agent/said.log 2>/dev/null | { grep -E '^coding-agent(-answer)?: .*\$[0-9]' || true; } | sed 's/^/- /'
             printf '\nPart of %s#%s\n' "$ARCHITECTURE" "$CHANGE"
           } > .agent/pr.md
           git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/change/$CHANGE"
           open="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "change/$CHANGE" --state open --json number -q '.[0].number')"
           if [ -n "$open" ]; then
+            gh pr view "$open" --repo "$GITHUB_REPOSITORY" --json body -q .body > .agent/earlier-pr.md
+            node .agent/system/pipeline/change.mjs runs .agent/earlier-pr.md .agent/pr.md
             gh pr edit "$open" --repo "$GITHUB_REPOSITORY" --body-file .agent/pr.md
           else
             title="$(gh issue view "$CHANGE" --repo "$ARCHITECTURE" --json title -q .title)"

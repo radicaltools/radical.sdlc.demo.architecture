@@ -35,6 +35,19 @@ export function scenariosToProve(report, here, nodes, verifies) {
   return changed.map((e) => ({ id: e.id, label: e.label, tests: verifies.find((v) => v.element === e.id)?.tests ?? [] }))
 }
 
+/** The tests a binding names: itself, or for a whole file, each test vitest lists in it, as
+ *  `<file> › <describe> › <name>`. */
+export function testsIn(binding, listed) {
+  if (binding.includes(' › ')) return [binding]
+  return listed.map(({ name }) => `${binding} › ${name.split(' > ').join(' › ')}`)
+}
+
+/** A whole file proves its scenario when one of its tests fails on main and passes here. */
+export function fileProof(binding, results) {
+  const proven = results.filter((r) => r.proven).length
+  return { test: binding, state: proven ? 'proven' : 'not proven', why: `${proven} of ${results.length} of its tests fail on main and pass here` }
+}
+
 /** The proof as a pull request shows it. */
 export function proofText(rows) {
   if (!rows.length) return 'No scenario of this part changed.'
@@ -64,13 +77,22 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     const nodes = readNodes(MODEL)
     const { here } = partOf(nodes, readRelations(MODEL), mappedBy('.radical/radical.json'))
     const { verifies = [] } = JSON.parse(readFileSync('.radical/radical.json', 'utf8'))
+    // A test fails with the code of main, and passes with this branch's.
+    const gate = (test) => {
+      const run = spawnSync('npx', ['radical', 'harden', '--gate', '--test', test, '--base', 'origin/main', '--runs', '1'], { encoding: 'utf8', maxBuffer: 64 << 20 })
+      return { proven: run.status === 0, why: run.status === 0 ? '' : `${run.stdout}\n${run.stderr}`.trim().split('\n').filter(Boolean).pop()?.slice(0, 200).replaceAll('|', '/') }
+    }
+    const listed = (file) => {
+      try { return JSON.parse(run('npx', 'vitest', 'list', file, '--json')) } catch { return [] }
+    }
     const rows = scenariosToProve(report, here, nodes, verifies).flatMap(({ label, tests }) => {
       if (!tests.length) return [{ label, state: 'none' }]
-      return tests.map((test) => {
-        // The test fails with the code of main, and passes with this branch's.
-        const gate = spawnSync('npx', ['radical', 'harden', '--gate', '--test', test, '--base', 'origin/main', '--runs', '1'], { encoding: 'utf8', maxBuffer: 64 << 20 })
-        const why = gate.status === 0 ? '' : `${gate.stdout}\n${gate.stderr}`.trim().split('\n').filter(Boolean).pop()?.slice(0, 200).replaceAll('|', '/')
-        return { label, test, state: gate.status === 0 ? 'proven' : 'not proven', why }
+      return tests.map((binding) => {
+        if (binding.includes(' › ')) {
+          const { proven, why } = gate(binding)
+          return { label, test: binding, state: proven ? 'proven' : 'not proven', why }
+        }
+        return { label, ...fileProof(binding, testsIn(binding, listed(binding)).slice(0, 20).map(gate)) }
       })
     })
     writeFileSync(out, `${proofText(rows)}\n`)

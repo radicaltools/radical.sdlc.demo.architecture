@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { outcome, proofText, scenariosToProve } from '../reconcile-code.mjs'
+import { fileProof, outcome, proofText, scenariosToProve, testsIn } from '../reconcile-code.mjs'
 
 const said = (result, questions = []) => ({ result, why: 'Because.', questions })
 const none = { push: false, mark: false, ask: false }
@@ -43,4 +43,15 @@ test('the proof says of each test whether it fails on main and passes here', () 
   assert.match(text, /\| New \| `a › b` \| fails on main, passes here \|/)
   assert.match(text, /\| Old \| `c › d` \| not proven: passes \| without the fix \|/)
   assert.match(text, /\| Bare \|  \| no test bound \|/)
+})
+
+test('a test bound by its name is itself; a whole file is each test vitest lists in it', () => {
+  assert.deepEqual(testsIn('a.test.ts › d › n', []), ['a.test.ts › d › n'])
+  assert.deepEqual(testsIn('o.test.ts', [{ name: 'openapi > describes GET' }, { name: 'top level' }]), ['o.test.ts › openapi › describes GET', 'o.test.ts › top level'])
+})
+
+test('a whole file proves its scenario when one of its tests fails on main and passes here', () => {
+  assert.deepEqual(fileProof('o.test.ts', [{ proven: false }, { proven: true }]), { test: 'o.test.ts', state: 'proven', why: '1 of 2 of its tests fail on main and pass here' })
+  assert.equal(fileProof('o.test.ts', [{ proven: false }]).state, 'not proven')
+  assert.equal(fileProof('o.test.ts', []).state, 'not proven')
 })
