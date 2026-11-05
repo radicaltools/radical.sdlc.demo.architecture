@@ -6,7 +6,7 @@
   "description": "The one model of the system of radical.tools.sdlc.demo.3, and the loop that brings its repositories to it.",
   "scripts": {
     "standards": "node tools/standards.mjs",
-    "test": "node --test pipeline/test/"
+    "test": "node --test pipeline/test/*.test.mjs"
   },
   "devDependencies": {
     "@radicaltools/cli": "0.3.3",
