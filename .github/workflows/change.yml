@@ -1,0 +1,236 @@
+name: Change
+
+# A change of the system, from a ticket to its acceptance (pipeline/change.mjs). It lives on the branch
+# change/<n>, here and in each repository it touches, and reaches main only when a person accepts all of it.
+#
+#   - the label agent:implement on a ticket: it becomes the change, or waits in the queue;
+#   - a person's comment on the open change, or on a ticket whose agents asked (agent:question): the model
+#     agent goes on, with the comment, on the change's branch;
+#   - a coding agent's question, or why it stopped, sent by its repository (workflow_dispatch);
+#   - the label agent:accept on a ready change: every pull request of it is merged, then the next starts.
+#
+# The model agent models the change on the branch, an agent that did not make it reviews it against the
+# ticket, and the model agent fixes what the review found, once. What the agent understood goes on the
+# ticket, and nobody waits for it. Then system.yml brings the repositories to the branch.
+#
+# The text of an issue is untrusted in a public repository. Only a ticket written by someone with write
+# access starts an agent, and only such a person answers or accepts. The text reaches the agents as a
+# file, never in a script, and an agent holds only the Claude credential.
+
+on:
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      ticket:
+        description: The ticket of the change
+        required: true
+      from:
+        description: The repository whose coding agent asks (empty to start the ticket)
+        required: false
+      kind:
+        description: question, or stuck
+        required: false
+      text:
+        description: What the coding agent asks, or why it stopped
+        required: false
+
+concurrency:
+  group: change-${{ github.event.issue.number || inputs.ticket }}
+
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
+jobs:
+  way:
+    name: Which way in
+    if: >-
+      (github.event_name == 'issues' && (github.event.label.name == 'agent:implement' || github.event.label.name == 'agent:accept')) ||
+      (github.event_name == 'issue_comment' && !github.event.issue.pull_request && github.event.comment.user.type != 'Bot' &&
+       (contains(github.event.issue.labels.*.name, 'agent:question') || contains(github.event.issue.labels.*.name, 'change:active'))) ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      way: ${{ steps.way.outputs.way }}
+      ticket: ${{ steps.way.outputs.ticket }}
+    steps:
+      - id: way
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          LABEL: ${{ github.event.label.name }}
+          ISSUE: ${{ github.event.issue.number }}
+          AUTHOR: ${{ github.event.issue.user.login }}
+          SENDER: ${{ github.event.sender.login }}
+          TICKET: ${{ inputs.ticket }}
+          FROM: ${{ inputs.from }}
+          KIND: ${{ inputs.kind }}
+        run: |
+          may() { [ "$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$1/permission" --jq .permission 2>/dev/null)" = admin ] ||
+                  [ "$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$1/permission" --jq .permission 2>/dev/null)" = write ]; }
+          case "$EVENT" in
+            workflow_dispatch)
+              case "$TICKET" in ''|*[!0-9]*) echo "::error::Not a ticket: $TICKET"; exit 1 ;; esac
+              way=start
+              if [ -n "$FROM" ]; then way="$KIND"; fi
+              case "$way" in start|question|stuck) ;; *) echo "::error::Not a way in: $way"; exit 1 ;; esac
+              echo "ticket=$TICKET" >> "$GITHUB_OUTPUT" ;;
+            issues)
+              if ! may "$AUTHOR" || ! may "$SENDER"; then
+                gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "Agents work only on a ticket written, labelled and accepted by people with write access to this repository."
+                exit 0
+              fi
+              if [ "$LABEL" = agent:accept ]; then way=accept; else way=start; fi
+              echo "ticket=$ISSUE" >> "$GITHUB_OUTPUT" ;;
+            issue_comment)
+              if ! may "$AUTHOR" || ! may "$SENDER"; then echo "No answer: the ticket or the comment is not of a person with write access."; exit 0; fi
+              # Runs of one ticket wait for each other, so the label is read as it is now.
+              waiting="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json labels -q '[.labels[].name] | (index("agent:question") != null) or (index("change:active") != null)')"
+              if [ "$waiting" != "true" ]; then echo "Neither an open change nor an agent waiting for an answer."; exit 0; fi
+              way=answer
+              echo "ticket=$ISSUE" >> "$GITHUB_OUTPUT" ;;
+          esac
+          echo "way=$way" >> "$GITHUB_OUTPUT"
+          echo "In by: $way"
+
+  model:
+    name: Model agent, and the review
+    needs: way
+    if: contains(fromJSON('["start","answer","question"]'), needs.way.outputs.way)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TICKET: ${{ needs.way.outputs.ticket }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: The standards, and the system's repositories
+        run: node tools/standards.mjs
+      - uses: ./.standards/.github/actions/setup
+        with:
+          claude: 'true'
+      - name: The change, or a place in the queue
+        id: start
+        if: needs.way.outputs.way == 'start'
+        env:
+          EVENT: ${{ github.event_name }}
+        run: node pipeline/change.mjs start "$TICKET"
+      - name: A coding agent asks
+        id: note
+        if: needs.way.outputs.way == 'question'
+        env:
+          FROM: ${{ inputs.from }}
+          TEXT: ${{ inputs.text }}
+        run: node pipeline/change.mjs note "$TICKET" "$FROM" question
+      - name: On the change's branch
+        if: steps.start.outputs.step != 'queued'
+        run: |
+          mkdir -p .agent
+          if git rev-parse -q --verify "origin/change/$TICKET" >/dev/null; then git checkout -B "change/$TICKET" "origin/change/$TICKET"; else git checkout -B "change/$TICKET"; fi
+      - name: Model agent, its answer, and the review
+        id: model
+        if: steps.start.outputs.step != 'queued'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AGENT_MODEL: ${{ vars.AGENT_MODEL }}
+          ROUNDS: ${{ steps.note.outputs.rounds }}
+          WAY: ${{ needs.way.outputs.way }}
+        run: |
+          # Past the rounds the agents may ask each other, the question goes to a person as it is.
+          if [ -n "$ROUNDS" ] && [ "$ROUNDS" -gt 2 ]; then
+            printf '## Questions\n\nThe coding agents asked about the model more than twice; the last question is above.\n' > .agent/questions.md
+            echo "result=question" >> "$GITHUB_OUTPUT"
+            echo "rounds=2" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node pipeline/change.mjs model "$TICKET"
+      - name: Ask a person
+        if: steps.model.outputs.result == 'question'
+        env:
+          ROUNDS: ${{ steps.model.outputs.rounds }}
+        run: |
+          git checkout -- .radical/model && git clean -fdq .radical/model
+          node .standards/pipeline/tools/questions.mjs ask "$TICKET" .agent/questions.md "$ROUNDS"
+      - name: A person reads why not
+        if: steps.model.outputs.result == 'could-not'
+        run: |
+          git checkout -- .radical/model && git clean -fdq .radical/model
+          { echo "The model agent could not model this, and changed nothing. It said:"; echo; cat .agent/model-report.md 2>/dev/null; cat .agent/model-said.json 2>/dev/null; } > .agent/why.md
+          gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body-file .agent/why.md
+          gh issue edit "$TICKET" --repo "$GITHUB_REPOSITORY" --add-label change:stuck
+      - name: Commit the model
+        if: steps.model.outputs.result == 'modelled'
+        env:
+          TITLE: ${{ steps.model.outputs.title }}
+        run: |
+          .standards/pipeline/tools/commit-as.sh model-agent "Model: $TITLE (#$TICKET)"
+      - name: Push the branch, and its pull request
+        if: steps.model.outputs.result == 'modelled' || steps.model.outputs.result == 'no-change'
+        env:
+          AGENT_TOKEN: ${{ secrets.AGENT_TOKEN }}
+          TITLE: ${{ steps.model.outputs.title }}
+          RESULT: ${{ steps.model.outputs.result }}
+        run: |
+          git push "https://x-access-token:${AGENT_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/change/$TICKET"
+          printf '\n\nFor #%s\n' "$TICKET" >> .agent/model-pr.md
+          open="$(GH_TOKEN="$AGENT_TOKEN" gh pr list --repo "$GITHUB_REPOSITORY" --head "change/$TICKET" --state open --json number -q '.[0].number')"
+          if [ -n "$open" ]; then
+            GH_TOKEN="$AGENT_TOKEN" gh pr edit "$open" --repo "$GITHUB_REPOSITORY" --body-file .agent/model-pr.md
+          elif [ "$RESULT" = modelled ]; then
+            GH_TOKEN="$AGENT_TOKEN" gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "change/$TICKET" --draft --title "Change #$TICKET: $TITLE" --body-file .agent/model-pr.md
+          fi
+          # What the agent understood goes on the ticket, so a person can turn it early. Nobody waits for it.
+          { echo '<!-- change: understood -->'; echo "**How the model agent understood it** ($RESULT, branch \`change/$TICKET\`). Nothing waits for an answer: a comment here turns it."; echo; cat .agent/model-pr.md; } > .agent/understood.md
+          gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body-file .agent/understood.md
+      - name: Bring the repositories to the branch
+        if: steps.model.outputs.result == 'modelled' || steps.model.outputs.result == 'no-change'
+        run: gh workflow run system.yml --repo "$GITHUB_REPOSITORY" --ref main
+
+  stuck:
+    name: A coding agent stopped
+    needs: way
+    if: needs.way.outputs.way == 'stuck'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TICKET: ${{ needs.way.outputs.ticket }}
+          FROM: ${{ inputs.from }}
+          TEXT: ${{ inputs.text }}
+        run: node pipeline/change.mjs note "$TICKET" "$FROM" stuck
+
+  accept:
+    name: Merge the change, then start the next
+    needs: way
+    if: needs.way.outputs.way == 'accept'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Merge every pull request of it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AGENT_TOKEN: ${{ secrets.AGENT_TOKEN }}
+          TICKET: ${{ needs.way.outputs.ticket }}
+        run: |
+          labels="$(gh issue view "$TICKET" --repo "$GITHUB_REPOSITORY" --json labels -q '[.labels[].name] | join(" ")')"
+          case " $labels " in *" change:ready "*) ;; *) gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body "Not merged: the change is not ready yet."; exit 1 ;; esac
+          node pipeline/change.mjs accept "$TICKET"
+      - name: The next change
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node pipeline/change.mjs next
