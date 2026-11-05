@@ -17,9 +17,12 @@ const PREFIX = 'agent/reconcile-'
 const run = (command, ...args) => execFileSync(command, args, { encoding: 'utf8', maxBuffer: 64 << 20 }).trim()
 
 /** What became of the agent's run. Code it built with a question goes up as a draft, with the question
- *  in its text: the work stays, the gate reads it, and a person decides. Anything else is as the standards say. */
-export function outcome({ changed, failed, questions, otherwise }) {
+ *  in its text: the work stays, the gate reads it, and a person decides. A run that says it needs no code
+ *  goes up however it wrote that, not only under the heading the standards read: the gate still judges
+ *  the pull request. Anything else is as the standards say. */
+export function outcome({ report = '', changed, failed, questions, otherwise }) {
   if (!failed && changed) return { act: 'pull', draft: questions }
+  if (!failed && !questions && /^\W*No code needed\b/im.test(report)) return { act: 'pull', draft: false }
   return { act: otherwise, draft: false }
 }
 
