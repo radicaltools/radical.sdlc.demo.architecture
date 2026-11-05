@@ -23,6 +23,9 @@
     },
     "fuzz": {
       "command": "node -e \"console.error(\\\"Measured in the repository that builds the element.\\\");process.exit(2)\""
+    },
+    "crosses": {
+      "command": "node -e \"console.error(\\\"Measured in the repository that builds the element.\\\");process.exit(2)\""
     }
   }
 }

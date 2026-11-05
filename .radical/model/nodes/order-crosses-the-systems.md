@@ -5,11 +5,11 @@ label: "Order crosses the systems"
 cadence: "triggered"
 characteristic: "reliability"
 invocation: "automated"
-max_age: "30d"
-measure: "smoke"
-metrics: "smoke.exit_code == 0"
+max_age: "14d"
+measure: "crosses"
+metrics: "crosses.exit_code == 0"
 scope: "holistic"
-trigger: "deploy"
+trigger: "pull-request"
 ---
 
-The sensor smoke (.radical/sensors/smoke.mjs) places, pays and ships an order through the running stacks of both systems, the Warehouse at its pinned version, and reads the notifications and the stock.
+The sensor crosses runs the repository it is in as it is and the other system as its main branch has it, talking over HTTP, with only the carrier standing in. An order is refused for short goods, then paid, shipped, tracked and returned, and the date the carrier gave has to come out of the Shop. It fails on a call or a field the two sides do not agree on, in the pull request of either side.
