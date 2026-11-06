@@ -1074,6 +1074,8 @@
     "kind": "table",
     "name": "Traceability",
     "nodeIds": [
+      "69658c50-a6dc-44c0-ac54-3ab7670523c8",
+      "5eac4132-7c62-45c2-b554-3f774aa95bff",
       "4cf8e71e-83ce-4f1c-af42-66152da94942",
       "47b8b5a3-086a-49ab-b275-fb4fd20d6642",
       "0df672f9-4134-41c6-b8bc-5cec52d39ce5",
@@ -1090,11 +1092,14 @@
       "6113cf28-c911-43f7-8ef6-c4b67a43149f",
       "5a5c2996-6b13-42ee-9f2a-f18102f79952",
       "4e5856e4-cb5c-48d0-bad2-899e16a810ab",
+      "29cfcc6b-6daa-4319-8fb8-627110f3b39b",
       "f808a6b8-145d-4759-99d4-af799bf94178",
       "188000c1-8a1e-485d-87a7-9fe26ada41a1",
       "9c55f757-6989-436c-bd48-f984a7efdcbc",
       "3f9b8f98-b0ab-4b5c-a813-2523fe246478",
       "681eedbe-5b3b-44cd-b8a4-6498cb6d0e46",
+      "2f407d17-7fb9-40fb-9aa8-e4108a7ff956",
+      "f9f63e18-b955-42b5-8f12-adc0e7981b31",
       "a9f84c1e-1616-449b-96c3-c881b7fd838a",
       "72a67d93-676f-44ab-8263-3bcbaa0df878",
       "da8819ba-1fd4-498c-a740-ef8c68030ddc",
@@ -1152,11 +1157,8 @@
       "1b9d1e15-291d-4b31-9f41-c3b9b52fdeeb",
       "42f674c7-fe87-4213-9d3f-9b2104562112",
       "77269ff9-9c28-457b-b53c-a2e4fe08d335",
-      "5eac4132-7c62-45c2-b554-3f774aa95bff",
-      "69658c50-a6dc-44c0-ac54-3ab7670523c8",
-      "29cfcc6b-6daa-4319-8fb8-627110f3b39b",
-      "2f407d17-7fb9-40fb-9aa8-e4108a7ff956",
-      "f9f63e18-b955-42b5-8f12-adc0e7981b31"
+      "5081f326-923a-42de-bef9-5fdf75ca1f4a",
+      "854d75c4-f913-479e-ab31-a539af0ac836"
     ],
     "pipeline": {
       "levels": [
@@ -1205,6 +1207,8 @@
     "kind": "table",
     "name": "Requirement coverage",
     "nodeIds": [
+      "69658c50-a6dc-44c0-ac54-3ab7670523c8",
+      "5eac4132-7c62-45c2-b554-3f774aa95bff",
       "4cf8e71e-83ce-4f1c-af42-66152da94942",
       "47b8b5a3-086a-49ab-b275-fb4fd20d6642",
       "f9ec4eeb-dab1-4e6b-b932-724267247bd9",
@@ -1222,9 +1226,9 @@
       "f808a6b8-145d-4759-99d4-af799bf94178",
       "188000c1-8a1e-485d-87a7-9fe26ada41a1",
       "9c55f757-6989-436c-bd48-f984a7efdcbc",
-      "2f407d17-7fb9-40fb-9aa8-e4108a7ff956",
       "3f9b8f98-b0ab-4b5c-a813-2523fe246478",
       "681eedbe-5b3b-44cd-b8a4-6498cb6d0e46",
+      "2f407d17-7fb9-40fb-9aa8-e4108a7ff956",
       "f9f63e18-b955-42b5-8f12-adc0e7981b31",
       "a9f84c1e-1616-449b-96c3-c881b7fd838a",
       "72a67d93-676f-44ab-8263-3bcbaa0df878",
@@ -1274,8 +1278,8 @@
       "eff4e42c-84cf-4ef1-aa4b-7250ace8dc64",
       "42f674c7-fe87-4213-9d3f-9b2104562112",
       "77269ff9-9c28-457b-b53c-a2e4fe08d335",
-      "5eac4132-7c62-45c2-b554-3f774aa95bff",
-      "69658c50-a6dc-44c0-ac54-3ab7670523c8"
+      "5081f326-923a-42de-bef9-5fdf75ca1f4a",
+      "854d75c4-f913-479e-ab31-a539af0ac836"
     ],
     "pipeline": {
       "levels": [

@@ -13,3 +13,9 @@ Placing an order takes a delivery address: street, city, postal code and country
 ## Answers
 
 The carrier's POST /parcels takes the delivery address as the same object the Shop gives the Warehouse: { "reference": …, "lines": […], "deliveryAddress": { "street", "city", "postalCode", "country" } }. (tomasz-zajac-oss)
+
+The Warehouse does not check the address: it passes it to the carrier as given, and the carrier's refusal comes back as 503, as today. The Shop checks the address when an order is placed. (tomasz-zajac-oss)
+
+POST /orders refuses an order with a missing or malformed delivery address with 400, says what is wrong, and stores no order, as for other wrong orders. (tomasz-zajac-oss)
+
+A country in lowercase, like pl, is taken and kept in uppercase (PL), so the Warehouse and the carrier always get uppercase. Only what is not two letters is refused. (tomasz-zajac-oss)
