@@ -4,5 +4,5 @@ type: "scenario"
 label: "Dispatch without a date"
 given: "a held reservation of 3 grinders, 10 on hand, and the carrier books its parcel with tracking number TRK-1 and no estimated delivery date"
 then: "the carrier got one booking, the answer is 201 with tracking number TRK-1 and estimatedDeliveryDate null, 7 are on hand with none held, and the reservation is dispatched"
-when: "a client dispatches it"
+when: "a client dispatches it with the delivery address Dluga 1, Warsaw, 00-001, PL"
 ---
