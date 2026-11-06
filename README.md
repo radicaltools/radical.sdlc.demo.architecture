@@ -1,7 +1,7 @@
-# radical.tools.sdlc.demo.3.architecture
+# radical.sdlc.demo.architecture
 
 **One system, one model, several repositories.** A shop sells goods and a warehouse sends them. They are
-built in two repositories, the [Warehouse](https://github.com/radicaltools/radical.tools.sdlc.demo.3.warehouse) and the [Shop](https://github.com/radicaltools/radical.tools.sdlc.demo.3.shop), and this repository holds the
+built in two repositories, the [Warehouse](https://github.com/radicaltools/radical.sdlc.demo.warehouse) and the [Shop](https://github.com/radicaltools/radical.sdlc.demo.shop), and this repository holds the
 model of the whole system.
 
 An agent sees the whole system and changes it at once, in one pull request. The work is divided only for
@@ -55,16 +55,16 @@ ticket in the queue.
 ## The first ticket
 
 It went through the earlier pipeline, where the model was merged on `main` first and the code followed.
-A customer whose order has shipped wants to know when it will arrive: [ticket #2](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/issues/2), "Estimated delivery date".
+A customer whose order has shipped wants to know when it will arrive: [ticket #2](https://github.com/radicaltools/radical.sdlc.demo.architecture/issues/2), "Estimated delivery date".
 It needs both repositories: the Warehouse has to keep the carrier's date, and the Shop has to show it.
 
 | Step | What happened |
 |---|---|
-| Model of both sides | [#5](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/5) changed the Warehouse's and the Shop's requirements in one pull request. An earlier try, [#3](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/3), modelled only the Shop and was closed; [#4](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/4) fixed why |
+| Model of both sides | [#5](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/5) changed the Warehouse's and the Shop's requirements in one pull request. An earlier try, [#3](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/3), modelled only the Shop and was closed; [#4](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/4) fixed why |
 | The Warehouse goes first | The loop started it, and kept the Shop waiting |
-| A gap in the model | Its agent asked what the carrier answers, and what if it gives no date. A person decided: the parcel goes on, and the date is null. That is [#6](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/issues/6) and [#7](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/7) |
-| A contradiction in the model | Its agent found 200 and 201 for one answer: [#9](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/issues/9) and [#10](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/10). Those two questions threw built code away, so [#8](https://github.com/radicaltools/radical.tools.sdlc.demo.3.architecture/pull/8) now keeps it as a draft |
-| The code | [The Warehouse's pull request](https://github.com/radicaltools/radical.tools.sdlc.demo.3.warehouse/pull/3), then, started by its merge, [the Shop's](https://github.com/radicaltools/radical.tools.sdlc.demo.3.shop/pull/1), at the first try and with no question |
+| A gap in the model | Its agent asked what the carrier answers, and what if it gives no date. A person decided: the parcel goes on, and the date is null. That is [#6](https://github.com/radicaltools/radical.sdlc.demo.architecture/issues/6) and [#7](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/7) |
+| A contradiction in the model | Its agent found 200 and 201 for one answer: [#9](https://github.com/radicaltools/radical.sdlc.demo.architecture/issues/9) and [#10](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/10). Those two questions threw built code away, so [#8](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/8) now keeps it as a draft |
+| The code | [The Warehouse's pull request](https://github.com/radicaltools/radical.sdlc.demo.warehouse/pull/3), then, started by its merge, [the Shop's](https://github.com/radicaltools/radical.sdlc.demo.shop/pull/1), at the first try and with no question |
 | The end | The loop found nothing left, and closed the three tickets |
 
 It took 8 agent runs and about $0.65, of which about $0.28 went on runs thrown away while the pipeline was being fixed.
