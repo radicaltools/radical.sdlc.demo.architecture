@@ -1,9 +1,9 @@
 {
-  "name": "radical.tools.sdlc.demo.3.architecture",
+  "name": "radical.sdlc.demo.architecture",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "The one model of the system of radical.tools.sdlc.demo.3, and the loop that brings its repositories to it.",
+  "description": "The one model of the system of radical.sdlc.demo, and the loop that brings its repositories to it.",
   "scripts": {
     "standards": "node tools/standards.mjs",
     "test": "node --test pipeline/test/*.test.mjs"

@@ -1,6 +1,6 @@
 {
   "repositories": [
-    { "name": "warehouse", "repo": "https://github.com/radicaltools/radical.tools.sdlc.demo.3.warehouse.git" },
-    { "name": "shop", "repo": "https://github.com/radicaltools/radical.tools.sdlc.demo.3.shop.git" }
+    { "name": "warehouse", "repo": "https://github.com/radicaltools/radical.sdlc.demo.warehouse.git" },
+    { "name": "shop", "repo": "https://github.com/radicaltools/radical.sdlc.demo.shop.git" }
   ]
 }

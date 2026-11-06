@@ -29,7 +29,7 @@ permissions:
   pull-requests: read
 
 env:
-  ARCHITECTURE: radicaltools/radical.tools.sdlc.demo.3.architecture
+  ARCHITECTURE: radicaltools/radical.sdlc.demo.architecture
 
 jobs:
   reconcile:

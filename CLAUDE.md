@@ -1,4 +1,4 @@
-# radical.tools.sdlc.demo.3.architecture
+# radical.sdlc.demo.architecture
 
 The one model of the whole system: the Shop and the Warehouse, built in two repositories.
 
