@@ -10,6 +10,7 @@
 //   node pipeline/change.mjs to <n> <phase> <why>  moves the change; asking counts a question to a person
 //   node pipeline/change.mjs model <n>             the model agent on the branch, its answer, and the review
 //                                                  (WAY=question when a coding agent asked)
+//   node pipeline/change.mjs asks <n>              the model agent's questions besides a model change, to a person
 //   node pipeline/change.mjs note <n> <from> <kind>  a coding agent's question (kind question) or why it stopped
 //                                                  (kind stuck), from TEXT; prints the rounds of questions so far
 //   node pipeline/change.mjs accept <n>            merges every pull request of the change: the model first
@@ -22,7 +23,7 @@ import { appendFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { fits } from './said.mjs'
-import { ACTIVE, BrokenState, move, queueOf, ticketsOf } from './state.mjs'
+import { ACTIVE, BrokenState, move, queueOf, ticketsOf, withQuestionOf } from './state.mjs'
 
 export const ACCEPT = 'agent:accept'
 /** A coding agent's question on the ticket. The standards' brief keeps notes of the pipeline
@@ -101,7 +102,8 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       console.log(tickets.read(n)?.phase ?? 'none')
     } else if (command === 'to') {
       const [phase, why] = rest
-      const state = to(phase, why, (s) => (phase === 'asking' ? { ...s, personQuestions: s.personQuestions + 1 } : s))
+      // A person's comment answers what was asked, or turns the change.
+      const state = to(phase, why, (s) => (phase === 'asking' ? { ...s, personQuestions: s.personQuestions + 1 } : phase === 'modelling' && why.startsWith('a person') ? { ...s, openQuestions: false } : s))
       console.log(`#${n} is ${state.phase}: ${why}.`)
       say([`rounds=${state.personQuestions - (phase === 'asking' ? 1 : 0)}`])
     } else if (command === 'start') {
@@ -144,8 +146,10 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
         const out = spawnSync('node', ['.standards/pipeline/tools/run-agent.mjs', 'model-agent', `brief=${briefFile}`, `source=issue-${n}`, '--report', '.agent/model-report.md'],
           { encoding: 'utf8', maxBuffer: 64 << 20, stdio: ['ignore', 'pipe', 'inherit'] })
         process.stdout.write(out.stdout ?? '')
-        costs.push(...(out.stdout ?? '').split('\n').filter((l) => /^model-agent: .*\$\d/.test(l)))
-        const asked = spawnSync('node', ['pipeline/said.mjs', 'model-agent', '.agent/model-said.json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] })
+        const ran = (out.stdout ?? '').split('\n').filter((l) => /^model-agent: .*\$\d/.test(l))
+        costs.push(...ran)
+        const runCost = ran.at(-1)?.match(/\$(\d+\.\d+)/)?.[1] ?? '0'
+        const asked = spawnSync('node', ['pipeline/said.mjs', 'model-agent', '.agent/model-said.json', runCost], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] })
         process.stdout.write(asked.stdout ?? '')
         costs.push(...(asked.stdout ?? '').split('\n').filter((l) => /^model-agent-answer: \$\d/.test(l)))
         const answer = existsSync('.agent/model-said.json') ? JSON.parse(readFileSync('.agent/model-said.json', 'utf8')) : null
@@ -169,9 +173,17 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
         '## Review', '', !review ? 'The review gave no answer.' : left.length ? `The review still finds, after the model agent's second try:\n\n${left.map((p) => `- ${p}`).join('\n')}` : 'The review found no problem.', '',
         '## Agent runs', '', ...costs.map((c) => `- ${c}`), ''].join('\n'))
       writeFileSync('.agent/questions.md', `## Questions\n\n${(answer?.questions ?? []).map((q, i) => `${i + 1}. ${q}`).join('\n') || answer?.why || 'The model agent gave no answer.'}\n`)
+      // Questions the model agent asks while it goes on: a person sees them, and nobody waits.
+      const alsoAsks = result === 'modelled' && (answer?.questions ?? []).length > 0
       tickets.write(n, (s) => ({ ...s, runs: [...s.runs, ...costs] }))
       console.log(`The model agent's run comes to: ${result}.`)
-      say([`result=${result}`, `title=${ticket.title.replace(/[\r\n]+/g, ' ').slice(0, 200)}`])
+      say([`result=${result}`, `asks=${alsoAsks}`, `title=${ticket.title.replace(/[\r\n]+/g, ' ').slice(0, 200)}`])
+    } else if (command === 'asks') {
+      // The model agent modelled the change and asks besides: on the ticket, under the mark the standards'
+      // brief keeps, so the next run reads the question and the answer together.
+      const { MARKER } = await import(join(process.cwd(), '.standards/pipeline/tools/questions.mjs'))
+      here('issue', 'comment', n, '--repo', repo, '--body', `${MARKER}\nThe model agent went on with the change, and asks a person too. Nobody waits for an answer; a comment here turns the change.\n\n${readFileSync('.agent/questions.md', 'utf8').replace(/^## Questions\s*/, '')}`)
+      tickets.write(n, (s) => ({ ...s, openQuestions: true }))
     } else if (command === 'note') {
       const [from, kind] = rest
       const text = (process.env.TEXT ?? '').slice(0, 20000)
@@ -181,9 +193,9 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
         say(['rounds=0'])
       } else {
         here('issue', 'comment', n, '--repo', repo, '--body', `${QUESTION}\nThe coding agent of the ${from} asks about the model on the branch ${branchOf(n)}. Answer it by changing the model so that it says it; if the answer changes what the system does for a customer, ask a person instead.\n\n${text}`)
-        const state = to('modelling', `the ${from}'s coding agent asks`, (s) => ({ ...s, agentQuestions: s.agentQuestions + 1 }))
-        console.log(`Question ${state.agentQuestions} of coding agents on #${n}.`)
-        say([`rounds=${state.agentQuestions}`])
+        const state = to('modelling', `the ${from}'s coding agent asks`, (s) => withQuestionOf(s, from))
+        console.log(`Question ${state.agentQuestions[from]} of the ${from}'s coding agent on #${n}.`)
+        say([`rounds=${state.agentQuestions[from]}`])
       }
     } else if (command === 'accept') {
       if (tickets.read(n)?.phase !== 'ready') {
@@ -225,7 +237,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
         console.log(next ? `Starts #${next}.` : 'The queue is empty.')
       }
     } else {
-      console.error('start, phase, to, model, note, accept, next or runs?')
+      console.error('start, phase, to, model, asks, note, accept, next or runs?')
       process.exit(2)
     }
   } catch (error) {

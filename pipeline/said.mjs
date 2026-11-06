@@ -3,7 +3,9 @@
 // answers about what it did, at the price of a cached read. Claude Code holds the answer to a JSON
 // shape, and the pipeline reads that, never headings in the agent's prose.
 //
-//   node pipeline/said.mjs <agent> <out.json>    asks the agent that ran last in this folder; two tries
+//   node pipeline/said.mjs <agent> <out.json> [<cost of the run>]   asks the agent that ran last in this
+//                                                  folder; two tries. A resumed session reports what the whole
+//                                                  session cost, so the run's cost is taken off to print the answer's.
 //
 // Writes nothing when neither try answered in the shape, and the step after reads that as no answer.
 // Runs from the checkout, with .standards/ there.
@@ -62,21 +64,21 @@ export function saidIn(stdout, agent) {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const [agent, out] = process.argv.slice(2)
+  const [agent, out, ran = '0'] = process.argv.slice(2)
   if (!RESULTS[agent] || !out) {
     console.error(`node pipeline/said.mjs <${Object.keys(RESULTS).join('|')}> <out.json>`)
     process.exit(2)
   }
   const { agentEnvironment } = await import(join(process.cwd(), '.standards/pipeline/tools/agents.mjs'))
   const { DEFAULT_MODEL } = await import(join(process.cwd(), '.standards/pipeline/tools/run-agent.mjs'))
-  let cost = 0
-  const spent = () => console.log(`${agent}-answer: $${cost.toFixed(3)}`)
+  let session = Number(ran) || 0
+  const spent = () => console.log(`${agent}-answer: $${Math.max(0, session - (Number(ran) || 0)).toFixed(3)}`)
   for (let attempt = 1; attempt <= 2; attempt++) {
     const answer = spawnSync('claude', ['-p', askOf(agent), '--continue', '--model', process.env.AGENT_MODEL || DEFAULT_MODEL,
       '--max-turns', '5', '--output-format', 'json', '--json-schema', JSON.stringify(schemaOf(agent))], {
       env: agentEnvironment(process.env), encoding: 'utf8', maxBuffer: 16 << 20, stdio: ['ignore', 'pipe', 'inherit'],
     })
-    try { cost += JSON.parse(answer.stdout).total_cost_usd ?? 0 } catch {}
+    try { session = Math.max(session, JSON.parse(answer.stdout).total_cost_usd ?? 0) } catch {}
     const said = saidIn(answer.stdout ?? '', agent)
     if (said) {
       spent()

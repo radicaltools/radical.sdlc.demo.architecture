@@ -27,7 +27,7 @@ const BLOCK = /\n*<!-- radical-change\n([\s\S]*?)\n-->\s*$/
 export class BrokenState extends Error {}
 
 export const newState = (at, extra = {}) => ({
-  v: 1, phase: 'queued', tried: {}, agentQuestions: 0, personQuestions: 0, red: [], runs: [],
+  v: 1, phase: 'queued', tried: {}, agentQuestions: {}, personQuestions: 0, openQuestions: false, red: [], runs: [],
   history: [{ at, phase: 'queued', why: 'the ticket' }], ...extra,
 })
 
@@ -60,12 +60,17 @@ export function move(state, phase, why, at) {
   return { ...state, phase, history: [...state.history, { at, phase, why }].slice(-50) }
 }
 
-/** The labels to add and to take off for the phase. */
-export function labelsOf(phase) {
+/** How many times a repository's coding agent has asked about the change. A count from before it was kept
+ *  per repository is for no repository. */
+export const askedBy = (state, name) => (typeof state.agentQuestions === 'object' ? state.agentQuestions[name] ?? 0 : 0)
+export const withQuestionOf = (state, name) => ({ ...state, agentQuestions: { ...(typeof state.agentQuestions === 'object' ? state.agentQuestions : {}), [name]: askedBy(state, name) + 1 } })
+
+/** The labels to add and to take off for a state: its phase, and questions a person has not answered yet. */
+export function labelsOf({ phase, openQuestions = false }) {
   const on = new Set([
     ...(phase === 'queued' ? [VIEW.queued] : []),
     ...(ACTIVE.has(phase) ? [VIEW.active] : []),
-    ...(phase === 'asking' ? [VIEW.asking] : []),
+    ...(phase === 'asking' || (openQuestions && ACTIVE.has(phase)) ? [VIEW.asking] : []),
     ...(phase === 'ready' || phase === 'accepting' ? [VIEW.ready] : []),
     ...(phase === 'stuck' ? [VIEW.stuck] : []),
   ])
@@ -100,7 +105,7 @@ export function ticketsOf(repo, now = () => new Date().toISOString()) {
       const state = change(parseState(body) ?? newState(now()))
       gh('issue', 'edit', String(n), '--repo', repo, '--body', withState(body, state))
       const has = new Set(labels.map((l) => l.name))
-      const { add, remove } = labelsOf(state.phase)
+      const { add, remove } = labelsOf(state)
       const edits = [...add.filter((l) => !has.has(l)).flatMap((l) => ['--add-label', l]), ...remove.filter((l) => has.has(l)).flatMap((l) => ['--remove-label', l])]
       if (edits.length) {
         try { gh('issue', 'edit', String(n), '--repo', repo, ...edits) } catch (error) { console.error(error.message) }
