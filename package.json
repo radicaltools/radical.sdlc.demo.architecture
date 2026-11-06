@@ -9,7 +9,7 @@
     "test": "node --test pipeline/test/*.test.mjs"
   },
   "devDependencies": {
-    "@radicaltools/cli": "0.3.3",
-    "@radicaltools/mcp": "0.3.3"
+    "@radicaltools/cli": "0.3.4",
+    "@radicaltools/mcp": "0.3.4"
   }
 }
