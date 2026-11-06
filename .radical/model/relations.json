@@ -12,6 +12,12 @@
     "targetId": "8e56e0a3-d7d9-4dce-96e8-74979390d8bb"
   },
   {
+    "id": "00519f75-afa9-4697-87c8-1ca08a77745d",
+    "relationType": "verifies",
+    "sourceId": "05472a56-1d7a-4045-9879-28af1d582922",
+    "targetId": "5e91fdd2-a5fb-4daa-a50f-bdac88b36847"
+  },
+  {
     "id": "005fd9c6-e268-4e73-8096-7815be9ac7f0",
     "relationType": "verifies",
     "sourceId": "e2e737e1-f4af-4d07-874b-e1776f80302c",
@@ -70,6 +76,12 @@
     "relationType": "satisfies",
     "sourceId": "f118a2e0-f802-4d11-b620-6708aee7de91",
     "targetId": "4a836ce8-5184-4b68-8b18-88e0c4b2ee47"
+  },
+  {
+    "id": "05905fae-c336-4845-8cd7-707f09df74cb",
+    "relationType": "verifies",
+    "sourceId": "280a9c11-1f80-49ca-be64-de80a14a921c",
+    "targetId": "c8643ea0-3330-496f-87f2-3d3f3fcd485e"
   },
   {
     "id": "05e8aaea-f647-4297-bc01-c8fc094029dd",
@@ -175,6 +187,12 @@
     "targetId": "80b286d3-fedc-4e07-9a40-e98943808c44"
   },
   {
+    "id": "176de54d-ee2d-4945-917a-74a64d98bd13",
+    "relationType": "verifies",
+    "sourceId": "e37874d6-fed7-48cb-9532-78360308e91a",
+    "targetId": "c8643ea0-3330-496f-87f2-3d3f3fcd485e"
+  },
+  {
     "id": "182d94ee-2aab-49e1-8d7d-0faa989c69c3",
     "relationType": "verifies",
     "sourceId": "b9cc9f4c-a261-45bc-b252-c9cf56cc888f",
@@ -205,6 +223,12 @@
     "relationType": "verifies",
     "sourceId": "f5d4294d-c011-4e2b-8780-0cfa61a5113b",
     "targetId": "7796dd1a-f393-4b6f-97ad-718b7de46d18"
+  },
+  {
+    "id": "1ccf68b2-a4f9-408c-918a-995b833087e5",
+    "relationType": "derives",
+    "sourceId": "5e91fdd2-a5fb-4daa-a50f-bdac88b36847",
+    "targetId": "3d22ee8d-dd27-4ecf-aac6-78b5506a3b9e"
   },
   {
     "id": "1da79528-1413-44cd-a8c7-a51c5733f8d0",
@@ -259,6 +283,12 @@
     "relationType": "verifies",
     "sourceId": "f9f63e18-b955-42b5-8f12-adc0e7981b31",
     "targetId": "2f407d17-7fb9-40fb-9aa8-e4108a7ff956"
+  },
+  {
+    "id": "229834bf-7bae-4421-bbed-fca74cf1a625",
+    "relationType": "satisfies",
+    "sourceId": "cae84d7c-e4be-4f47-b354-58a955864ae3",
+    "targetId": "c8643ea0-3330-496f-87f2-3d3f3fcd485e"
   },
   {
     "id": "22e74a34-d7d5-4a1f-b0ec-9be6c3d537bc",
@@ -404,6 +434,12 @@
     "targetId": "84694d8d-a58c-47b7-bd2b-1516a3e6678e"
   },
   {
+    "id": "31cb5d30-f6f2-4d8b-97ca-478862d9c9d1",
+    "relationType": "verifies",
+    "sourceId": "09155768-81b2-453e-b699-8050a57dd6c5",
+    "targetId": "017b2e7d-d32f-4ab2-848c-9e8472557f9b"
+  },
+  {
     "event": "40061898-2dc7-479a-877c-04b6f1431c7f",
     "id": "320fb6a6-b301-4c18-839c-06c6b836874c",
     "relationType": "transition",
@@ -524,6 +560,12 @@
     "relationType": "satisfies",
     "sourceId": "cae84d7c-e4be-4f47-b354-58a955864ae3",
     "targetId": "8261908b-27e7-4e70-8c2f-1f3b970536ff"
+  },
+  {
+    "id": "500e524e-7860-4da2-9c67-2f58e8dea9d1",
+    "relationType": "satisfies",
+    "sourceId": "cae84d7c-e4be-4f47-b354-58a955864ae3",
+    "targetId": "5e91fdd2-a5fb-4daa-a50f-bdac88b36847"
   },
   {
     "id": "50b07782-2d82-4dcc-be33-f20646469efb",
@@ -674,6 +716,12 @@
     "targetId": "ea465e58-9ca0-468c-a087-17c1a063dacc"
   },
   {
+    "id": "62de0b14-bdcd-4493-ab52-ef184ed90446",
+    "relationType": "verifies",
+    "sourceId": "1f068e39-1001-4234-8e42-e86f8a9cb616",
+    "targetId": "41f7d3ae-4c5d-44a3-bb88-3605d4568b75"
+  },
+  {
     "id": "6414e7f9-cf56-4abd-ae9e-2561cd9f09f5",
     "relationType": "derives",
     "sourceId": "2874b580-3fcc-4fe2-b3b7-836ad04844cc",
@@ -684,6 +732,12 @@
     "relationType": "satisfies",
     "sourceId": "43e15411-fea4-497a-9442-85d6ac891a59",
     "targetId": "681eedbe-5b3b-44cd-b8a4-6498cb6d0e46"
+  },
+  {
+    "id": "64bc37a0-d41d-46e5-acd2-18cfbeae6173",
+    "relationType": "verifies",
+    "sourceId": "410d600a-c182-4971-8c2d-e31d3d8a14dc",
+    "targetId": "c8643ea0-3330-496f-87f2-3d3f3fcd485e"
   },
   {
     "event": "6ff68be8-d305-40dd-bd3d-e9f970e23107",
@@ -767,6 +821,12 @@
     "targetId": "23a8ca79-46f4-4524-aa28-df283f2ee85c"
   },
   {
+    "id": "6e2ada52-936c-421e-b283-9ce1af2487e7",
+    "relationType": "satisfies",
+    "sourceId": "f118a2e0-f802-4d11-b620-6708aee7de91",
+    "targetId": "41f7d3ae-4c5d-44a3-bb88-3605d4568b75"
+  },
+  {
     "id": "6e31f6ff-b9ba-49a8-aaa5-7649d9d0ba0e",
     "relationType": "satisfies",
     "sourceId": "cae84d7c-e4be-4f47-b354-58a955864ae3",
@@ -845,6 +905,12 @@
     "targetId": "8b1f2f97-d3cc-4f65-9ed7-92f78097815d"
   },
   {
+    "id": "7cbd7ac5-5db9-4ca0-bc27-f0474979e3fb",
+    "relationType": "derives",
+    "sourceId": "c8643ea0-3330-496f-87f2-3d3f3fcd485e",
+    "targetId": "3d22ee8d-dd27-4ecf-aac6-78b5506a3b9e"
+  },
+  {
     "id": "7d073542-8ec2-4dc2-b61a-fd8a3f1d623c",
     "relationType": "verifies",
     "sourceId": "170d177c-7252-482c-90b8-c28a26f34c5f",
@@ -886,6 +952,12 @@
     "relationType": "satisfies",
     "sourceId": "f118a2e0-f802-4d11-b620-6708aee7de91",
     "targetId": "7796dd1a-f393-4b6f-97ad-718b7de46d18"
+  },
+  {
+    "id": "816ce1be-f43e-4fdd-951f-4597d10af144",
+    "relationType": "satisfies",
+    "sourceId": "cae84d7c-e4be-4f47-b354-58a955864ae3",
+    "targetId": "be88bfd9-c5ae-4b01-a0b3-b4a4aeefec5f"
   },
   {
     "id": "81939b56-e6eb-4ea5-a4cb-3cb142213214",
@@ -1379,6 +1451,12 @@
     "targetId": "bfe601e0-c9b0-4cfd-ad69-6d1a81b7750c"
   },
   {
+    "id": "c5fa1e9d-4b87-45b3-a257-fd14d3db672d",
+    "relationType": "derives",
+    "sourceId": "41f7d3ae-4c5d-44a3-bb88-3605d4568b75",
+    "targetId": "3d22ee8d-dd27-4ecf-aac6-78b5506a3b9e"
+  },
+  {
     "id": "c6d841ef-2953-4b2d-aaf7-068fb443c648",
     "relationType": "derives",
     "sourceId": "9253a06b-e597-404c-b718-563acc8aae1f",
@@ -1431,6 +1509,16 @@
     "targetId": "f673aaf6-d550-484e-b24a-e60783332f63"
   },
   {
+    "actions": "the warehouse releases the reservation of the order; once released, the full paid amount is refunded",
+    "event": "40061898-2dc7-479a-877c-04b6f1431c7f",
+    "guard": "the order has not shipped",
+    "id": "ca64096e-297f-4df0-bf1f-bfda97dc109e",
+    "label": "Cancel",
+    "relationType": "transition",
+    "sourceId": "84fb387d-6a79-4f41-8173-4e463ac210bd",
+    "targetId": "04f16171-9efc-4aa3-8440-f8c357af47b9"
+  },
+  {
     "id": "caadf977-c869-4b23-8d0d-cf93769edeb4",
     "label": "Records deliveries in",
     "relationType": "interacts",
@@ -1478,6 +1566,12 @@
     "relationType": "satisfies",
     "sourceId": "cae84d7c-e4be-4f47-b354-58a955864ae3",
     "targetId": "4fce0583-fad1-475b-87ca-b49d34357c49"
+  },
+  {
+    "id": "cd7a6517-1ec0-4625-aff3-d98a037fc739",
+    "relationType": "verifies",
+    "sourceId": "d1ee7a35-57c2-43f1-a6ae-f66ea62854ed",
+    "targetId": "c8643ea0-3330-496f-87f2-3d3f3fcd485e"
   },
   {
     "id": "cf88a006-2554-4afe-954b-16dcc277bf02",
@@ -1639,6 +1733,12 @@
     "targetId": "008f5df0-a1c6-4e6b-a2db-3109f84db60a"
   },
   {
+    "id": "e400d603-b5cd-4072-a164-844ff8f8b557",
+    "relationType": "derives",
+    "sourceId": "be88bfd9-c5ae-4b01-a0b3-b4a4aeefec5f",
+    "targetId": "3d22ee8d-dd27-4ecf-aac6-78b5506a3b9e"
+  },
+  {
     "id": "e4044e0b-47b3-4b13-9ff0-85bc5ee4919c",
     "relationType": "constrains",
     "sourceId": "b28e5aaa-5336-48ae-96f5-00023d2c6288",
@@ -1790,6 +1890,12 @@
     "relationType": "constrains",
     "sourceId": "9e515080-0dc7-486c-8cd3-74cd74e090fe",
     "targetId": "6ef298ce-4568-470b-898f-2e02d8aa0217"
+  },
+  {
+    "id": "f84cc131-0b0c-471f-ace2-43777ad1298f",
+    "relationType": "verifies",
+    "sourceId": "6df84f62-7fc3-4e0d-b3cc-2ab67c2907a7",
+    "targetId": "be88bfd9-c5ae-4b01-a0b3-b4a4aeefec5f"
   },
   {
     "id": "fa721afe-1b13-41d2-acfe-93142ee00380",

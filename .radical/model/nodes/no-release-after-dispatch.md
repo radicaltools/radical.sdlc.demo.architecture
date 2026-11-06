@@ -4,5 +4,5 @@ type: "scenario"
 label: "No release after dispatch"
 given: "a dispatched reservation"
 then: "the answer is 409, and availability does not change"
-when: "a client releases it"
+when: "a client releases it with Idempotency-Key k-2"
 ---

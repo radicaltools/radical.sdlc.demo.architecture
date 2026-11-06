@@ -4,4 +4,4 @@ type: "state-machine"
 label: "Order lifecycle"
 ---
 
-Placed, then paid and shipped; a shipped order may be returned within 14 days of shipping; or cancelled while still placed.
+Placed, then paid and shipped; a shipped order may be returned within 14 days of shipping; or cancelled while placed or paid, until it ships. A cancelled paid order releases its goods and is refunded in full.
