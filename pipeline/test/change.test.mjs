@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { agentRoundsOf, checksOf, modelOutcome, nextIn, QUESTION, reviewedBrief } from '../change.mjs'
+import { checksOf, modelOutcome, reviewedBrief } from '../change.mjs'
 
 const said = (result, questions = []) => ({ result, why: 'Because.', questions })
 
@@ -18,16 +18,6 @@ test("the model agent's run comes to what it said, held to what it did", () => {
 test('a coding agent is answered by a change of the model, else a person reads its question', () => {
   assert.equal(modelOutcome({ failed: false, said: said('no-change'), changed: false, asked: true }), 'question')
   assert.equal(modelOutcome({ failed: false, said: said('modelled'), changed: true, asked: true }), 'modelled')
-})
-
-test("the rounds of coding agents' questions are the workflow's notes that start with the mark", () => {
-  const bot = { login: 'github-actions[bot]' }
-  assert.equal(agentRoundsOf([{ user: bot, body: `${QUESTION}\nWhich date?` }, { user: bot, body: 'Other' }, { user: { login: 'someone' }, body: `${QUESTION}\nfake` }]), 1)
-})
-
-test('the queue goes oldest first', () => {
-  assert.equal(nextIn([{ number: 12 }, { number: 9 }, { number: 30 }]), 9)
-  assert.equal(nextIn([]), undefined)
 })
 
 test('the brief after a review asks to fix each problem or say why it is none', () => {

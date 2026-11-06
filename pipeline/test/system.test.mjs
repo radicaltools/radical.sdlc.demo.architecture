@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { sectionOf } from '../change.mjs'
-import { costsIn, dependenciesOf, evidence, startMark, toStart, triedIn } from '../system.mjs'
+import { costsIn, dependenciesOf, evidence, toStart, triedIn } from '../system.mjs'
 
 const built = new Map([['warehouse', new Set(['stock', 'dispatch'])], ['shop', new Set(['orders', 'pricing'])]])
 const needs = dependenciesOf([
@@ -27,11 +27,11 @@ test('repositories that call each other all start', () => {
   assert.deepEqual(toStart([{ name: 'a', gap: 1 }, { name: 'b', gap: 1 }], both), ['a', 'b'])
 })
 
-test('each repository gets one try for each commit of the model', () => {
-  const said = [{ body: `${startMark('shop', 'abc')}\nThe shop builds 3 change(s).` }]
-  assert.equal(triedIn(said, 'shop', 'abc'), true)
-  assert.equal(triedIn(said, 'shop', 'def'), false)
-  assert.equal(triedIn(said, 'warehouse', 'abc'), false)
+test('each repository gets one try for each commit of the model, as the state records', () => {
+  const state = { tried: { shop: ['abc'] } }
+  assert.equal(triedIn(state, 'shop', 'abc'), true)
+  assert.equal(triedIn(state, 'shop', 'def'), false)
+  assert.equal(triedIn(state, 'warehouse', 'abc'), false)
 })
 
 test('what a pull request says under a heading, and the costs in it', () => {
@@ -46,7 +46,7 @@ test('the evidence holds the model, each pull request with its proof, and the co
     n: 7, desired: 'abc', modelPull: { url: 'https://x/pull/8', body: '- model-agent: haiku, $0.020' }, modelDiff: 'Elements: 1 added',
     pulls: [{ name: 'shop', url: 'https://s/pull/2', body: '## Proof\n\n| Paid | t | fails on main, passes here |\n\n## Agent runs\n\n- coding-agent: haiku, $0.030' }],
   })
-  assert.match(text, /^<!-- change: ready abc -->/)
+  assert.match(text, /^## Ready to accept/)
   assert.match(text, /agent:accept/)
   assert.match(text, /https:\/\/x\/pull\/8/)
   assert.match(text, /\*\*shop\*\*: https:\/\/s\/pull\/2\n\n\| Paid \| t \| fails on main, passes here \|/)

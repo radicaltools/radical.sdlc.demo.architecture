@@ -39,6 +39,12 @@ the code there agree. One change goes at a time, and the others wait in the queu
 8. **A person accepts it all** with the label `agent:accept`. The loop merges the model first, then the
    code, closes the ticket, and starts the next in the queue.
 
+**Where a change is** is its state, kept at the end of its ticket's text in a hidden block that only the
+pipeline writes (`pipeline/state.mjs`): its phase (queued, modelling, asking, building, ready, accepting,
+stuck, accepted), each repository's tries, how many questions were asked, and every move with its reason.
+The labels `change:*` and `agent:question` are drawn from it; leave the block alone, as a block that is not
+what the pipeline wrote stops the change.
+
 **Where a person comes in:** the ticket, a question only a person can answer, a comment that turns what the
 model agent understood, a change `change:stuck` that the agents could not finish, and the acceptance.
 Nobody merges anything by hand.
@@ -76,6 +82,7 @@ pipeline/crosses.mjs     the test of the two systems together
 pipeline/change.mjs, .github/workflows/change.yml   a change, from its ticket to its acceptance; the queue
 pipeline/review.mjs, pipeline/agents/model-review.md   the review of a model change against its ticket
 pipeline/said.mjs        asks an agent what became of its run, in a JSON shape
+pipeline/state.mjs       a change's state in its ticket: its phases and the moves between them
 docs/sdlc.svg            the diagram above
 ```
 
