@@ -2,8 +2,9 @@ name: Bring the code to the model
 
 # A reusable workflow. A repository of the system calls it from a file of a few lines, and it runs on
 # that repository's checkout, on the branch change/<n> of the change. Its coding agent reads the whole
-# model as that branch has it here, with its history, in .radical/model; the gate judges its part, in
-# .agent/part. Nothing here merges: a person accepts the whole change on its ticket here.
+# model as that branch has it here, with its history, in .radical/model; the repository's .radical/radical.json
+# names the model, so radical check and radical sense run judge its part, as its gate does. Nothing here
+# merges: a person accepts the whole change on its ticket here.
 #
 # The coding agent's code goes up on the branch, in a draft pull request with the proof of its tests.
 # What it says became of its run (pipeline/said.mjs) decides the rest: a question goes to the model agent
@@ -60,9 +61,6 @@ jobs:
       - name: What the other repositories have, on this change or on main
         if: steps.look.outputs.step == 'work'
         run: node .agent/system/pipeline/reconcile-code.mjs neighbours "change/$CHANGE"
-      - name: The agent checks its work as the gate will
-        if: steps.look.outputs.step == 'work'
-        run: sed -i 's#radical sense run --trigger#radical sense run --folder .agent/part --trigger#; s#radical check .radical/model#radical check .agent/part#' .claude/skills/coding-agent/SKILL.md
       - name: Coding agent
         id: agent
         if: steps.look.outputs.step == 'work'

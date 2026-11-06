@@ -27,11 +27,10 @@ test('a person reads a run that failed, could not finish, said nothing in the sh
   assert.deepEqual(outcome({ said: said('built'), changed: false, failed: false }), none)
 })
 
-test('the scenarios to prove are those of the part that changed, with their tests', () => {
-  const report = { elements: { added: [{ id: 's1', type: 'scenario', label: 'New' }], changed: [{ id: 's2', label: 'Changed' }, { id: 'r1', type: 'requirement', label: 'Req' }, { id: 's3', type: 'scenario', label: 'Elsewhere' }], removed: [{ id: 's4', type: 'scenario', label: 'Gone' }] } }
-  const nodes = [{ id: 's2', type: 'scenario' }]
+test('the scenarios to prove are those the part added or changed, with their tests', () => {
+  const report = { elements: { added: [{ id: 's1', type: 'scenario', label: 'New' }], changed: [{ id: 's2', type: 'scenario', label: 'Changed' }, { id: 'r1', type: 'requirement', label: 'Req' }], removed: [{ id: 's4', type: 'scenario', label: 'Gone' }] } }
   const verifies = [{ element: 's1', tests: ['a.test.ts › new'] }]
-  assert.deepEqual(scenariosToProve(report, new Set(['s1', 's2', 'r1']), nodes, verifies), [
+  assert.deepEqual(scenariosToProve(report, verifies), [
     { id: 's1', label: 'New', tests: ['a.test.ts › new'] },
     { id: 's2', label: 'Changed', tests: [] },
   ])

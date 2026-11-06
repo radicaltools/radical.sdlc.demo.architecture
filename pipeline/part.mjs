@@ -1,17 +1,13 @@
 #!/usr/bin/env node
-// One repository's part of the one system model, as a folder `radical check` and `radical sense run`
-// read as they are. The part is what the repository maps in `implements` of its .radical/radical.json
-// and all under it, the requirements those elements satisfy with what they derive from, the state
-// machines they implement with all under them, the entities they realise and those machines are of, the scenarios of those
-// requirements and machines, the ADRs that constrain the elements, and the fitness functions of those
-// ADRs. The ancestors come along, for the tree to hold. No AI runs here.
-//
-//   node pipeline/part.mjs <whole model> <out folder> <radical.json>
-import { execSync } from 'node:child_process'
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
+// A repository's part of the one system model. The CLI knows it since 0.3.4: a repository whose
+// .radical/radical.json names the model ("model") is judged on its part by radical check and radical
+// sense run, and radical diff --part lists what of its part changed. What is left here is what the loop
+// needs of it: how much a repository has left to build, and which elements it builds, for the order.
+// No AI runs here.
+import { execFileSync } from 'node:child_process'
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { basename, dirname, join, relative } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { basename, dirname, join } from 'node:path'
 
 const walk = (folder) => readdirSync(folder).flatMap((name) => {
   const path = join(folder, name)
@@ -31,76 +27,37 @@ export function readNodes(whole) {
   return files.map((n) => ({ ...n, parentId: owners.get(basename(n.path) === '_index.md' ? dirname(dirname(n.path)) : dirname(n.path)) }))
 }
 
-/** `built`: the elements under what the repository maps. `here`: the ids it answers for. `keep`: those and their ancestors. */
-export function partOf(nodes, relations, mapped) {
-  const byId = new Map(nodes.map((n) => [n.id, n]))
-  const under = (node, roots) => { for (let at = node; at; at = byId.get(at.parentId)) if (roots.has(at.id)) return true; return false }
-  const built = new Set(nodes.filter((n) => under(n, mapped)).map((n) => n.id))
-  const sources = (type, targets) => relations.filter((r) => r.relationType === type && targets.has(r.targetId)).map((r) => r.sourceId)
-  const targets = (type, from) => relations.filter((r) => r.relationType === type && from.has(r.sourceId)).map((r) => r.targetId)
-  const requirements = new Set(targets('satisfies', built))
-  for (let size = -1; size !== requirements.size;) { size = requirements.size; targets('derives', requirements).forEach((id) => requirements.add(id)) }
-  const realised = new Set(targets('realises', built))
-  const machines = new Set([...targets('implements', built), ...sources('lifecycle-of', realised)])
-  const entities = [...realised, ...targets('lifecycle-of', machines)]
-  const behaviour = nodes.filter((n) => under(n, machines)).map((n) => n.id)
-  const adrs = new Set(sources('constrains', built))
-  const here = new Set([...built, ...requirements, ...entities, ...behaviour, ...sources('verifies', new Set([...requirements, ...machines])), ...adrs, ...sources('implements', adrs)])
-  const keep = new Set(here)
-  for (const id of here) for (let at = byId.get(byId.get(id)?.parentId); at; at = byId.get(at.parentId)) keep.add(at.id)
-  return { built, here, keep }
-}
-
 export const readRelations = (whole) => JSON.parse(readFileSync(join(whole, 'relations.json'), 'utf8'))
 export const mappedBy = (mapping) => new Set(JSON.parse(readFileSync(mapping, 'utf8')).implements.map((m) => m.element))
 
-/** Writes the part. An id no node has belongs to another model (deps.json), so its relations stay. */
-export function writePart(whole, out, mapped) {
-  const nodes = readNodes(whole)
-  const relations = readRelations(whole)
-  const { keep } = partOf(nodes, relations, mapped)
-  const known = new Set(nodes.map((n) => n.id))
-  const stays = (id) => !known.has(id) || keep.has(id)
-  rmSync(out, { recursive: true, force: true })
-  mkdirSync(out, { recursive: true })
-  for (const name of readdirSync(whole)) if (!name.startsWith('.') && name !== 'nodes') cpSync(join(whole, name), join(out, name), { recursive: true })
-  for (const node of nodes.filter((n) => keep.has(n.id))) {
-    const to = join(out, 'nodes', relative(join(whole, 'nodes'), node.path))
-    mkdirSync(dirname(to), { recursive: true })
-    cpSync(node.path, to)
-  }
-  writeFileSync(join(out, 'relations.json'), JSON.stringify(relations.filter((r) => stays(r.sourceId) && stays(r.targetId)), null, 2))
-  writeFileSync(join(out, 'views.json'), '[]\n')
-  return { kept: nodes.filter((n) => keep.has(n.id)).length, of: nodes.length }
+/** The elements a repository builds: those under what it maps. */
+export function builtBy(nodes, mapped) {
+  const byId = new Map(nodes.map((n) => [n.id, n]))
+  const under = (node) => { for (let at = node; at; at = byId.get(at.parentId)) if (mapped.has(at.id)) return true; return false }
+  return new Set(nodes.filter(under).map((n) => n.id))
 }
 
-/** How many changes of a `radical diff --format json` report touch `ids`. */
-export function gapIn({ elements, relations }, ids) {
-  const touched = (list) => list.filter((e) => ids.has(e.id)).length
-  const linked = (list) => list.filter((r) => ids.has(r.source?.id) || ids.has(r.target?.id)).length
-  return ['added', 'changed', 'removed'].reduce((sum, kind) => sum + touched(elements[kind]) + linked(relations[kind]), 0)
-}
+/** How many changes a `radical diff --format json` report holds. */
+export const countOf = ({ elements, relations }) =>
+  ['added', 'changed', 'removed'].reduce((sum, kind) => sum + elements[kind].length + relations[kind].length, 0)
 
-/** What the repository still has to build since `commit`: changes of its part as it is now, and as it
- *  was then, so that an element taken out of the model counts too. The commit has to be in this git. */
-export function gapSince(whole, commit, mapped) {
-  const report = JSON.parse(execSync(`npx radical diff ${whole} --since ${commit} --format json`, { encoding: 'utf8', maxBuffer: 64 << 20 }))
-  const then = mkdtempSync(join(tmpdir(), 'model-'))
+/** What of the part changed since `commit`: radical diff --part, run on the model folder `folder`, whose
+ *  repository's .radical/radical.json says what the part is. The commit has to be in that git. */
+export const partSince = (folder, commit) =>
+  JSON.parse(execFileSync('npx', ['radical', 'diff', folder, '--part', '--since', commit, '--format', 'json'], { encoding: 'utf8', maxBuffer: 64 << 20 }))
+
+/** What another repository has left to build of the model checked out here: radical diff --part reads the
+ *  mapping of the repository the model folder is in, so the model goes into a worktree of this repository
+ *  with that mapping beside it. */
+export function gapOf(model, mapping, commit) {
+  const dir = mkdtempSync(join(tmpdir(), 'part-'))
+  rmSync(dir, { recursive: true, force: true })
+  execFileSync('git', ['worktree', 'add', '--quiet', '--detach', dir, 'HEAD'])
   try {
-    execSync(`git archive ${commit} ${whole} | tar -x -C ${then}`)
-    const before = join(then, whole)
-    const ids = new Set([
-      ...partOf(readNodes(whole), readRelations(whole), mapped).here,
-      ...partOf(readNodes(before), readRelations(before), mapped).here,
-    ])
-    return gapIn(report, ids)
+    mkdirSync(join(dir, '.radical'), { recursive: true })
+    writeFileSync(join(dir, '.radical/radical.json'), mapping)
+    return countOf(partSince(join(dir, model), commit))
   } finally {
-    rmSync(then, { recursive: true, force: true })
+    execFileSync('git', ['worktree', 'remove', '--force', dir])
   }
-}
-
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const [whole, out, mapping] = process.argv.slice(2)
-  const { kept, of } = writePart(whole, out, mappedBy(mapping))
-  console.log(`This repository's part: ${kept} of ${of} elements.`)
 }

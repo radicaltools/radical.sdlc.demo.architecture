@@ -11,7 +11,7 @@ import { execFileSync, spawnSync } from 'node:child_process'
 import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { gapSince, mappedBy, partOf, readNodes, readRelations } from './part.mjs'
+import { countOf, partSince } from './part.mjs'
 import { fits } from './said.mjs'
 
 const MODEL = '.radical/model'
@@ -28,10 +28,9 @@ export function outcome({ said, changed, failed }) {
   return { push: changed || !asks, mark: !asks, ask: asks }
 }
 
-/** The scenarios of the part that changed since `base`, with the tests bound to them. */
-export function scenariosToProve(report, here, nodes, verifies) {
-  const type = new Map(nodes.map((n) => [n.id, n.type]))
-  const changed = [...report.elements.added, ...report.elements.changed].filter((e) => (e.type ?? type.get(e.id)) === 'scenario' && here.has(e.id))
+/** The scenarios added or changed in a report of the part (radical diff --part), with the tests bound to them. */
+export function scenariosToProve(report, verifies) {
+  const changed = [...report.elements.added, ...report.elements.changed].filter((e) => e.type === 'scenario')
   return changed.map((e) => ({ id: e.id, label: e.label, tests: verifies.find((v) => v.element === e.id)?.tests ?? [] }))
 }
 
@@ -61,7 +60,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   if (command === 'next') {
     const { model: base } = JSON.parse(readFileSync('.radical/reconciled.json', 'utf8'))
     const desired = readFileSync('.agent/desired', 'utf8').trim()
-    const gap = gapSince(MODEL, base, mappedBy('.radical/radical.json'))
+    const gap = countOf(partSince(MODEL, base))
     console.log(gap ? `work: ${gap} change(s) of the model at ${desired.slice(0, 7)} are not in the code.` : 'converged: the code has reached the model.')
     appendFileSync(process.env.GITHUB_OUTPUT ?? '/dev/null', [`step=${gap ? 'work' : 'converged'}`, `base=${base}`, `desired=${desired}`].map((l) => `${l}\n`).join(''))
   } else if (command === 'outcome') {
@@ -73,9 +72,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     appendFileSync(process.env.GITHUB_OUTPUT ?? '/dev/null', `push=${push}\nmark=${mark}\nask=${ask}\nstuck=${!push && !ask}\n`)
   } else if (command === 'proof') {
     const [base, out] = process.argv.slice(3)
-    const report = JSON.parse(run('npx', 'radical', 'diff', MODEL, '--since', base, '--format', 'json'))
-    const nodes = readNodes(MODEL)
-    const { here } = partOf(nodes, readRelations(MODEL), mappedBy('.radical/radical.json'))
+    const report = partSince(MODEL, base)
     const { verifies = [] } = JSON.parse(readFileSync('.radical/radical.json', 'utf8'))
     // A test fails with the code of main, and passes with this branch's.
     const gate = (test) => {
@@ -85,7 +82,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     const listed = (file) => {
       try { return JSON.parse(run('npx', 'vitest', 'list', file, '--json')) } catch { return [] }
     }
-    const rows = scenariosToProve(report, here, nodes, verifies).flatMap(({ label, tests }) => {
+    const rows = scenariosToProve(report, verifies).flatMap(({ label, tests }) => {
       if (!tests.length) return [{ label, state: 'none' }]
       return tests.map((binding) => {
         if (binding.includes(' › ')) {

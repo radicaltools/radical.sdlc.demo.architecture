@@ -22,7 +22,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { branchOf, checksOf, LABELS, nextIn, sectionOf } from './change.mjs'
-import { gapSince, mappedBy, partOf, readNodes, readRelations } from './part.mjs'
+import { builtBy, gapOf, mappedBy, readNodes, readRelations } from './part.mjs'
 
 const MODEL = '.radical/model'
 
@@ -110,9 +110,8 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       const slug = repo.match(/github\.com\/(.+?)(\.git)?$/)[1]
       const mapping = join(scratch, `${name}.json`)
       writeFileSync(mapping, fileOf(slug, '.radical/radical.json', ref))
-      const mapped = mappedBy(mapping)
       const { model } = JSON.parse(fileOf(slug, '.radical/reconciled.json', ref))
-      return { name, slug, model, gap: gapSince(MODEL, model, mapped), built: partOf(nodes, relations, mapped).built }
+      return { name, slug, model, gap: gapOf(MODEL, readFileSync(mapping, 'utf8'), model), built: builtBy(nodes, mappedBy(mapping)) }
     })
     return { repositories, needs: dependenciesOf(relations, new Map(repositories.map((r) => [r.name, r.built]))) }
   }

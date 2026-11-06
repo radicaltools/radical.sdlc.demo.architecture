@@ -68,7 +68,7 @@ It took 8 agent runs and about $0.65, of which about $0.28 went on runs thrown a
 ```
 .radical/model/          the model of the whole system
 .radical/system.json     the repositories that build it
-pipeline/part.mjs        one repository's part of the model
+pipeline/part.mjs        how much a repository has left (radical diff --part), and what it builds, for the order
 pipeline/system.mjs      the loop: who has what left, who goes now
 pipeline/reconcile-code.mjs, .github/workflows/reconcile-code.yml   a repository's side of it
 pipeline/model-agent-whole-system.md   replaces what the standards' model agent says about other systems
@@ -79,18 +79,21 @@ pipeline/said.mjs        asks an agent what became of its run, in a JSON shape
 docs/sdlc.svg            the diagram above
 ```
 
-A repository holds no model. It keeps `.radical/radical.json` (which folder builds which element,
-which test checks which scenario) and `.radical/reconciled.json`. Its `tools/model.mjs` fetches the
-model's commits into its own git and unpacks the model into `.radical/model`, out of git:
+A repository holds no model. It keeps `.radical/radical.json`, which names this repository as the model's
+(`"model"`), says which folder builds which element and which test checks which scenario, and
+`.radical/reconciled.json`. Its `tools/model.mjs` fetches the model's commits into its own git and unpacks
+the whole model into `.radical/model`, out of git:
 
-- **For its Gate:** its part, at the commit `reconciled.json` names. A change of the model turns no
-  repository red until its code gets there.
-- **For its coding agent:** the whole model as `main` has it, with the part in `.agent/part`. The
-  commits being in its git is why `get_changes` works there.
+- **For its Gate:** at the commit `reconciled.json` names. A change of the model turns no repository red
+  until its code gets there.
+- **For its coding agent:** as the change's branch has it. The commits being in its git is why
+  `get_changes` works there.
 
-A repository's part is what it maps in `implements`, all under it, the requirements, state machines and
-entities those elements answer for, their scenarios, the ADRs that constrain them and the fitness functions
-of those ADRs.
+Because `.radical/radical.json` names the model, the CLI (from 0.3.4) judges the repository on its part of
+it: `radical check` and `radical sense run` look only at the part, and `radical diff --part` lists what of
+it changed, which is what the repository has left to build. A repository's part is what it maps in
+`implements`, all under it, the requirements, state machines and entities those elements answer for, their
+scenarios, the ADRs that constrain them and the fitness functions of those ADRs.
 
 ## The two together
 
@@ -111,10 +114,11 @@ with nothing for the Shop on the branch stays red.
 - **Versions across repositories.** The Warehouse is not pinned in the Shop: the model orders the work, and
   the sensors `warehouse-contract` and `crosses` read the other side's branch or `main`. So running a Gate
   again can give another answer once the other side has changed.
-- **Support in the product.** The part is worked out by `pipeline/part.mjs`, which reads the model's files
-  directly, and Radical Studio and the MCP tools know nothing of it. Two things are also changed on
-  the fly: the model agent's skill in `tools/standards.mjs`, and the commands the coding agent checks
-  its work with, in `reconcile-code.yml`. The standards' model and coding agents report in prose, so
+- **Support in the product.** The CLI knows a repository's part, but Radical Studio and the MCP tools do
+  not: `get_issues` in a code repository judges the whole model. The loop still reads the model's files to
+  know which repository builds which element, and puts the model in a worktree with a repository's mapping
+  to run `radical diff --part` for it. And the model agent's skill is changed on the fly in
+  `tools/standards.mjs`. The standards' model and coding agents report in prose, so
   `pipeline/said.mjs` asks each once more, in its own session, what became of its run, in a JSON shape.
 - **More than one change at a time.** The next waits until the open one is accepted or closed.
 
