@@ -109,7 +109,9 @@ try {
   await Promise.all([stock, dispatch, pricing, notifications, orders].map(answers))
 
   const sku = 'crosses'
-  const place = (quantity) => ok('POST', `${orders}/orders`, { lines: [{ sku, unitPrice: 20, quantity }] })
+  // An order goes to an address (ticket #22); a Shop from before it takes no address, and ignores one.
+  const deliveryAddress = { street: 'Dluga 1', city: 'Warsaw', postalCode: '00-001', country: 'PL' }
+  const place = (quantity) => ok('POST', `${orders}/orders`, { lines: [{ sku, unitPrice: 20, quantity }], deliveryAddress })
   const shelf = () => ok('GET', `${stock}/stock/${sku}`)
   await ok('POST', `${stock}/stock/receipts`, { sku, quantity: 5 })
 
