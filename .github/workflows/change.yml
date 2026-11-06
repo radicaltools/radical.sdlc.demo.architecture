@@ -13,6 +13,9 @@ name: Change
 # ticket, and the model agent fixes what the review found, once. What the agent understood goes on the
 # ticket, and nobody waits for it. Then system.yml brings the repositories to the branch.
 #
+# Where the change is, and what it has been through, is its state at the end of the ticket's text
+# (pipeline/state.mjs), which only the pipeline writes; the labels are drawn from it for people.
+#
 # The text of an issue is untrusted in a public repository. Only a ticket written by someone with write
 # access starts an agent, and only such a person answers or accepts. The text reaches the agents as a
 # file, never in a script, and an agent holds only the Claude credential.
@@ -59,6 +62,9 @@ jobs:
       way: ${{ steps.way.outputs.way }}
       ticket: ${{ steps.way.outputs.ticket }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - id: way
         env:
           GH_TOKEN: ${{ github.token }}
@@ -89,9 +95,9 @@ jobs:
               echo "ticket=$ISSUE" >> "$GITHUB_OUTPUT" ;;
             issue_comment)
               if ! may "$AUTHOR" || ! may "$SENDER"; then echo "No answer: the ticket or the comment is not of a person with write access."; exit 0; fi
-              # Runs of one ticket wait for each other, so the label is read as it is now.
-              waiting="$(gh issue view "$ISSUE" --repo "$GITHUB_REPOSITORY" --json labels -q '[.labels[].name] | (index("agent:question") != null) or (index("change:active") != null)')"
-              if [ "$waiting" != "true" ]; then echo "Neither an open change nor an agent waiting for an answer."; exit 0; fi
+              # Runs of one ticket wait for each other, so the state is read as it is now.
+              phase="$(node pipeline/change.mjs phase "$ISSUE")"
+              case "$phase" in modelling|asking|building|ready|stuck) ;; *) echo "The change is $phase: a comment does not turn it."; exit 0 ;; esac
               way=answer
               echo "ticket=$ISSUE" >> "$GITHUB_OUTPUT" ;;
           esac
@@ -123,6 +129,9 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
         run: node pipeline/change.mjs start "$TICKET"
+      - name: A person's comment turns it
+        if: needs.way.outputs.way == 'answer'
+        run: node pipeline/change.mjs to "$TICKET" modelling "a person's comment"
       - name: A coding agent asks
         id: note
         if: needs.way.outputs.way == 'question'
@@ -152,10 +161,14 @@ jobs:
             exit 0
           fi
           node pipeline/change.mjs model "$TICKET"
+      - name: The agents wait for a person
+        id: asking
+        if: steps.model.outputs.result == 'question'
+        run: node pipeline/change.mjs to "$TICKET" asking "a question only a person answers"
       - name: Ask a person
         if: steps.model.outputs.result == 'question'
         env:
-          ROUNDS: ${{ steps.model.outputs.rounds }}
+          ROUNDS: ${{ steps.asking.outputs.rounds }}
         run: |
           git checkout -- .radical/model && git clean -fdq .radical/model
           node .standards/pipeline/tools/questions.mjs ask "$TICKET" .agent/questions.md "$ROUNDS"
@@ -165,7 +178,7 @@ jobs:
           git checkout -- .radical/model && git clean -fdq .radical/model
           { echo "The model agent could not model this, and changed nothing. It said:"; echo; cat .agent/model-report.md 2>/dev/null; cat .agent/model-said.json 2>/dev/null; } > .agent/why.md
           gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body-file .agent/why.md
-          gh issue edit "$TICKET" --repo "$GITHUB_REPOSITORY" --add-label change:stuck
+          node pipeline/change.mjs to "$TICKET" stuck "the model agent could not model it"
       - name: Commit the model
         if: steps.model.outputs.result == 'modelled'
         env:
@@ -190,8 +203,9 @@ jobs:
             GH_TOKEN="$AGENT_TOKEN" gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "change/$TICKET" --draft --title "Change #$TICKET: $TITLE" --body-file .agent/model-pr.md
           fi
           # What the agent understood goes on the ticket, so a person can turn it early. Nobody waits for it.
-          { echo '<!-- change: understood -->'; echo "**How the model agent understood it** ($RESULT, branch \`change/$TICKET\`). Nothing waits for an answer: a comment here turns it."; echo; cat .agent/model-pr.md; } > .agent/understood.md
+          { echo "**How the model agent understood it** ($RESULT, branch \`change/$TICKET\`). Nothing waits for an answer: a comment here turns it."; echo; cat .agent/model-pr.md; } > .agent/understood.md
           gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body-file .agent/understood.md
+          node pipeline/change.mjs to "$TICKET" building "$RESULT"
       - name: Bring the repositories to the branch
         if: steps.model.outputs.result == 'modelled' || steps.model.outputs.result == 'no-change'
         run: gh workflow run system.yml --repo "$GITHUB_REPOSITORY" --ref main
@@ -227,7 +241,7 @@ jobs:
           SENDER: ${{ github.event.sender.login }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body "Accepted by @$SENDER. Merging every pull request of the change, the model first: $RUN"
+          gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body "Accepted by @$SENDER. Once the change is ready and every gate green, every pull request of it is merged, the model first: $RUN"
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -236,10 +250,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           AGENT_TOKEN: ${{ secrets.AGENT_TOKEN }}
           TICKET: ${{ needs.way.outputs.ticket }}
-        run: |
-          labels="$(gh issue view "$TICKET" --repo "$GITHUB_REPOSITORY" --json labels -q '[.labels[].name] | join(" ")')"
-          case " $labels " in *" change:ready "*) ;; *) gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body "Not merged: the change is not ready yet."; exit 1 ;; esac
-          node pipeline/change.mjs accept "$TICKET"
+        run: node pipeline/change.mjs accept "$TICKET"
       - name: The next change
         env:
           GH_TOKEN: ${{ github.token }}
