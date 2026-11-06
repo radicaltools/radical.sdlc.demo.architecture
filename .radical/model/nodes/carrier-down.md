@@ -4,5 +4,5 @@ type: "scenario"
 label: "Carrier down"
 given: "a held reservation and a carrier that does not answer"
 then: "the answer is 503 and the reservation is still held"
-when: "a client dispatches it"
+when: "a client dispatches it with the delivery address Dluga 1, Warsaw, 00-001, PL"
 ---

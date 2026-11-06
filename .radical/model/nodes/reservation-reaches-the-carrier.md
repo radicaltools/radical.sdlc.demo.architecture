@@ -12,4 +12,4 @@ scope: "holistic"
 trigger: "deploy"
 ---
 
-The sensor smoke (.radical/sensors/smoke.mjs) reserves and dispatches through the running stack, with a stand-in for the carrier.
+The sensor smoke reserves and dispatches through the running stack, with a delivery address and a stand-in for the carrier.
