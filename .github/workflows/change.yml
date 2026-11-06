@@ -153,9 +153,9 @@ jobs:
           ROUNDS: ${{ steps.note.outputs.rounds }}
           WAY: ${{ needs.way.outputs.way }}
         run: |
-          # Past the rounds the agents may ask each other, the question goes to a person as it is.
+          # Past the rounds a repository's coding agent may ask the model agent, its question goes to a person as it is.
           if [ -n "$ROUNDS" ] && [ "$ROUNDS" -gt 2 ]; then
-            printf '## Questions\n\nThe coding agents asked about the model more than twice; the last question is above.\n' > .agent/questions.md
+            printf '## Questions\n\nThis coding agent asked about the model more than twice; its last question is above.\n' > .agent/questions.md
             echo "result=question" >> "$GITHUB_OUTPUT"
             echo "rounds=2" >> "$GITHUB_OUTPUT"
             exit 0
@@ -206,6 +206,9 @@ jobs:
           { echo "**How the model agent understood it** ($RESULT, branch \`change/$TICKET\`). Nothing waits for an answer: a comment here turns it."; echo; cat .agent/model-pr.md; } > .agent/understood.md
           gh issue comment "$TICKET" --repo "$GITHUB_REPOSITORY" --body-file .agent/understood.md
           node pipeline/change.mjs to "$TICKET" building "$RESULT"
+      - name: The model agent asks a person besides
+        if: steps.model.outputs.asks == 'true'
+        run: node pipeline/change.mjs asks "$TICKET"
       - name: Bring the repositories to the branch
         if: steps.model.outputs.result == 'modelled' || steps.model.outputs.result == 'no-change'
         run: gh workflow run system.yml --repo "$GITHUB_REPOSITORY" --ref main

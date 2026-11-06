@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { ACTIVE, BrokenState, MOVES, labelsOf, move, newState, parseState, queueOf, withState } from '../state.mjs'
+import { ACTIVE, BrokenState, MOVES, askedBy, labelsOf, move, newState, parseState, queueOf, withQuestionOf, withState } from '../state.mjs'
 
 const at = '2026-11-06T10:00:00Z'
 
@@ -31,13 +31,24 @@ test('a change moves only as the table says, and keeps what it went through', ()
   for (const [from, tos] of Object.entries(MOVES)) for (const to of tos) assert.ok(MOVES[to], `${from} → ${to}`)
 })
 
-test('the labels are drawn from the phase', () => {
-  assert.deepEqual(labelsOf('queued').add, ['change:queued'])
-  assert.deepEqual(labelsOf('asking').add.sort(), ['agent:question', 'change:active'])
-  assert.deepEqual(labelsOf('ready').add.sort(), ['change:active', 'change:ready'])
-  assert.deepEqual(labelsOf('accepted').add, [])
-  assert.ok(labelsOf('accepted').remove.includes('change:active'))
-  assert.ok(!labelsOf('stuck').remove.includes('change:stuck'))
+test('the labels are drawn from the phase, and from questions a person has not answered', () => {
+  assert.deepEqual(labelsOf({ phase: 'queued' }).add, ['change:queued'])
+  assert.deepEqual(labelsOf({ phase: 'asking' }).add.sort(), ['agent:question', 'change:active'])
+  assert.deepEqual(labelsOf({ phase: 'ready' }).add.sort(), ['change:active', 'change:ready'])
+  assert.deepEqual(labelsOf({ phase: 'building', openQuestions: true }).add.sort(), ['agent:question', 'change:active'])
+  assert.deepEqual(labelsOf({ phase: 'accepted', openQuestions: true }).add, [])
+  assert.ok(labelsOf({ phase: 'accepted' }).remove.includes('change:active'))
+  assert.ok(!labelsOf({ phase: 'stuck' }).remove.includes('change:stuck'))
+})
+
+test("each repository's coding agent has its own count of questions", () => {
+  let state = newState(at)
+  state = withQuestionOf(withQuestionOf(state, 'warehouse'), 'warehouse')
+  state = withQuestionOf(state, 'shop')
+  assert.equal(askedBy(state, 'warehouse'), 2)
+  assert.equal(askedBy(state, 'shop'), 1)
+  assert.equal(askedBy({ agentQuestions: 5 }, 'shop'), 0, 'a count from before is for no repository')
+  assert.deepEqual(withQuestionOf({ agentQuestions: 5 }, 'shop').agentQuestions, { shop: 1 })
 })
 
 test('one change is open at a time, and the oldest waiting goes next', () => {
