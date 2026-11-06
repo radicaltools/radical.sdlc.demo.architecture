@@ -4,5 +4,5 @@ type: "requirement"
 label: "Address in OpenAPI"
 action: "the dispatch service's OpenAPI description shall describe the request body of POST /dispatches with the deliveryAddress object, optional, its four fields street, city, postalCode and country, the country a two-letter code such as PL, next to the required reservationId; it shall remove and rename nothing in it."
 ears_type: "ubiquitous"
-rationale: "The orders service sends deliveryAddress and the Shop follows the Warehouse API, so the description the sensor checks must carry the field. The field is optional, so a client that does not send it yet is still described correctly. An addition is a minor version."
+rationale: "The orders service sends deliveryAddress, so the description of the request body must carry the field. The field is optional, so a client that does not send it yet is still described correctly."
 ---
