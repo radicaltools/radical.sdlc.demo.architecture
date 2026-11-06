@@ -7,6 +7,10 @@ model of the whole system.
 An agent sees the whole system and changes it at once, in one pull request. The work is divided only for
 building it: each repository's coding agent reads the whole model and builds its own part.
 
+The model depends on one other: the company's [standards](https://github.com/radicaltools/radical.sdlc.demo.standards),
+pinned in `.radical/model/deps.json`. Their decisions and fitness functions show in this model read-only, and
+the standards also give the Gate and the agents' skills, at the same version.
+
 ## How a change gets through
 
 ![A person opens a ticket. The model agent models the change of the whole system on a branch, says on the ticket what it understood, and a review agent reads the change against the ticket. After a green Gate the system loop starts the Warehouse first, because the Shop calls it, then the Shop, each building on the same branch. A coding agent's question goes to the model agent, who answers in the model, and the loop builds again. When every Gate is green, the evidence goes on the ticket, a person accepts it all at once, and the loop merges the model first, then the code.](docs/sdlc.svg)
@@ -20,7 +24,9 @@ the code there agree. One change goes at a time, and the others wait in the queu
 1. **A ticket** with the label `agent:implement`, here. It becomes the change, or waits in the queue
    (`change:queued`).
 2. **The model agent** models the change of the whole system on the branch, both sides of it at once. What
-   it understood goes on the ticket, and nobody waits for an answer: a comment there turns it.
+   it understood goes on the ticket, and nobody waits for an answer: a comment there turns it. A question
+   only a person can answer stops it (`agent:question`); one it asks while it goes on gets the same label,
+   and the change goes on.
 3. **A review agent**, which did not make the change, reads it against the ticket: a side left out, a rule
    nobody asked for, a contradiction. The model agent fixes what it found, once. Then the Gate checks the
    model with `radical check`.
@@ -30,7 +36,8 @@ the code there agree. One change goes at a time, and the others wait in the queu
 5. **The coding agents** build their part on their branch `change/<n>`, from `get_changes` alone, and the
    pipeline asks each what became of its run, in a JSON shape. A question about the model goes to the model
    agent, which answers by changing the model, and the loop builds again. Only a question the model agent
-   cannot answer goes to a person, on the ticket. A coding agent asks twice at most.
+   cannot answer goes to a person, on the ticket. Each repository's coding agent may ask the model agent
+   twice; its next question goes to a person.
 6. **Each Gate** runs the tests, the sensors and `radical check` of its part. Its test of the two systems
    together, `crosses`, takes the other side from the same branch. And each pull request carries the proof
    of its tests: each test of a changed scenario fails with the code of `main` and passes with the branch's.
@@ -52,22 +59,31 @@ Nobody merges anything by hand.
 Once a day the loop also checks `main`: a repository whose code has not reached the model there gets a
 ticket in the queue.
 
-## The first ticket
+## A change through it
 
-It went through the earlier pipeline, where the model was merged on `main` first and the code followed.
-A customer whose order has shipped wants to know when it will arrive: [ticket #2](https://github.com/radicaltools/radical.sdlc.demo.architecture/issues/2), "Estimated delivery date".
-It needs both repositories: the Warehouse has to keep the carrier's date, and the Shop has to show it.
+[Ticket #22](https://github.com/radicaltools/radical.sdlc.demo.architecture/issues/22), "Delivery address": a
+customer gives the address their order goes to, and the carrier gets it. Both repositories change: the Shop
+takes the address and passes it on, the Warehouse books the carrier with it.
 
-| Step | What happened |
-|---|---|
-| Model of both sides | [#5](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/5) changed the Warehouse's and the Shop's requirements in one pull request. An earlier try, [#3](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/3), modelled only the Shop and was closed; [#4](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/4) fixed why |
-| The Warehouse goes first | The loop started it, and kept the Shop waiting |
-| A gap in the model | Its agent asked what the carrier answers, and what if it gives no date. A person decided: the parcel goes on, and the date is null. That is [#6](https://github.com/radicaltools/radical.sdlc.demo.architecture/issues/6) and [#7](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/7) |
-| A contradiction in the model | Its agent found 200 and 201 for one answer: [#9](https://github.com/radicaltools/radical.sdlc.demo.architecture/issues/9) and [#10](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/10). Those two questions threw built code away, so [#8](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/8) now keeps it as a draft |
-| The code | [The Warehouse's pull request](https://github.com/radicaltools/radical.sdlc.demo.warehouse/pull/3), then, started by its merge, [the Shop's](https://github.com/radicaltools/radical.sdlc.demo.shop/pull/1), at the first try and with no question |
-| The end | The loop found nothing left, and closed the three tickets |
+| When (UTC) | What happened | Who |
+|---|---|---|
+| 09:49 | The ticket, labelled `agent:implement`, becomes the change | a person |
+| 09:58 | The model of both sides on `change/22`, after the review; the Warehouse starts | model agent, review agent, the loop |
+| 10:00–11:04 | The Warehouse's agent asks four times (a sensor that sends no address, how the carrier takes it, an address it cannot check), the Shop's once (the status of a refusal). The model agent answers in the model; what only a person knows goes to the ticket | coding agents, model agent |
+| 10:15–10:30 | The sensors `crosses` and `smoke` send an address: a coding agent cannot change a sensor | a person |
+| 10:18–11:05 | Four answers on the ticket: the carrier's field, an address the Warehouse forwards unchecked, 400 for a wrong order, a lowercase country kept in uppercase | a person |
+| 11:10 | Both repositories built: [Warehouse #13](https://github.com/radicaltools/radical.sdlc.demo.warehouse/pull/13), [Shop #10](https://github.com/radicaltools/radical.sdlc.demo.shop/pull/10) | coding agents |
+| 11:14 | Every Gate green with both sides on the branch; the evidence on the ticket | the loop |
+| 11:17 | `agent:accept`: [the model](https://github.com/radicaltools/radical.sdlc.demo.architecture/pull/23), then the code, merged in 18 seconds | a person, the loop |
 
-It took 8 agent runs and about $0.65, of which about $0.28 went on runs thrown away while the pipeline was being fixed.
+1 h 25 min from the ticket to ready, and about $1.50 of agent runs; the model agent ran eleven times, with its
+review each time. 8 of the changed scenarios have a test that fails on `main` and passes on the branch; 5 have
+tests that pass on `main` too, as only their text changed. What #22 showed is fixed since: each repository
+has its own count of questions, a model agent's question besides its model goes to a person, and the
+pipeline's scripts come from the change's branch.
+
+The [first ticket](https://github.com/radicaltools/radical.sdlc.demo.architecture/issues/2), "Estimated delivery
+date", went through an earlier pipeline, where the model was merged on `main` before the code.
 
 ## What is where
 
@@ -108,6 +124,10 @@ Each side's own tests use a stand-in for the other, so they cannot see a field n
 The sensor `crosses` can: in the Gate of a pull request it runs that repository's code and the other's, from the same change's branch or else `main`, with
 only the carrier standing in, and sends an order through every call the Shop makes to the Warehouse. It checks that
 what the Warehouse answers comes out of the Shop. It takes seconds and no AI.
+
+The Gate takes the pipeline's scripts, `crosses` among them, from the tip of the change's branch, and a
+coding agent cannot change a sensor. So when a change alters what the test has to send, as the address of
+#22 did, a person changes the test on the branch, and it counts from that push.
 
 Both sides of a change are tested together and merged together, so a rename of a field can go in one change.
 The Warehouse builds first, and its Gate first runs with the Shop's `main`; once every repository has built
